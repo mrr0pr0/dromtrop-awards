@@ -1,0 +1,203 @@
+# Drømtorp Awards – Cursor Rules
+
+## Project Identity
+This is **IT-Gullruten / Drømtorp Awards** – a school awards voting platform built for Drømtorp videregående skole. The event runs from ~12:00–13:15 with 10 main categories, jury-based winners, and a public audience vote.
+
+---
+
+## Tech Stack (NEVER deviate from this)
+- **Framework:** Next.js 15 (App Router)
+- **Language:** TypeScript – strict mode always
+- **Database:** Neon DB (PostgreSQL via `@neondatabase/serverless`)
+- **Auth:** NextAuth.js v5 (Auth.js) with Email / Magic Link provider
+- **Styling:** Tailwind CSS v4 + CSS variables
+- **Image hosting:** Cloudinary (external only – no SDK integration needed in the app)
+- **Package manager:** `pnpm` ONLY – never suggest `npm install` or `yarn`
+- **Runtime:** Node.js / Vercel Edge where appropriate
+
+---
+
+## Package Manager Rules
+- ALWAYS use `pnpm` – never `npm install`, never `yarn add`
+- Use `pnpx` only when running one-off CLI tools (e.g. `pnpx prisma`)
+- Lock file is `pnpm-lock.yaml` – never delete it
+
+---
+
+## Design System – SACRED, NEVER CHANGE
+
+### Color Palette
+These exact hex values must be used as CSS variables. Do not invent new colors.
+
+```css
+:root {
+  --color-gold:        #C9A84C; /* Prestige Gold – primary accent */
+  --color-gold-light:  #E8D5A3; /* Mjuk Gull – background fields */
+  --color-gold-deep:   #8B6914; /* Dyp Gull – shadows, depth */
+  --color-black:       #1C1C1C; /* Obsidian Black – backgrounds, text */
+  --color-charcoal:    #2D2D2D; /* Mørk Kull – secondary background */
+  --color-parchment:   #FAF8F4; /* Pergament – light backgrounds */
+  --color-white:       #FFFFFF; /* White – text on dark surfaces */
+}
+```
+
+### Typography
+Import from Google Fonts. Never substitute these fonts.
+
+| Role | Font | Weight | Size |
+|---|---|---|---|
+| Display / Title | Cormorant Garamond | Light 300 | 56–72px |
+| Heading 1 | Montserrat | SemiBold 600 | 28–36px |
+| Heading 2 | Montserrat | Medium 500 | 20–24px |
+| Body | Montserrat | Regular 400 | 10–12px |
+| Caption | Montserrat | Light 300 Italic | 8–9px |
+
+### Visual Style
+- Dark-first: primary backgrounds use `--color-black` and `--color-charcoal`
+- Gold accents on borders, highlights, buttons, and active states
+- Light surfaces use `--color-parchment`
+- All text on dark surfaces must be `--color-white` or `--color-gold-light`
+- Buttons: gold background (`--color-gold`) with black text, or outlined gold on dark
+- No gradients unless they blend between the defined palette
+- Smooth transitions: `transition: all 0.2s ease`
+- Rounded corners: `rounded-lg` (8px) as default
+
+---
+
+## File & Folder Structure
+
+```
+src/
+  app/
+    (auth)/
+      login/
+    (protected)/
+      vote/
+      results/
+      admin/
+        dashboard/
+        categories/
+        nominees/
+        users/
+    api/
+      auth/
+      votes/
+      categories/
+      nominees/
+      users/
+  components/
+    ui/           # Reusable primitives (Button, Card, Badge, etc.)
+    layout/       # Navbar, Sidebar, Footer
+    voting/       # VoteCard, CategoryList, NomineeCard
+    admin/        # DataTable, StatCard, UserRow
+    results/      # Leaderboard, RankCard
+  lib/
+    db/           # Neon DB client and query helpers
+    auth/         # NextAuth config
+    validations/  # Zod schemas
+    utils/        # Shared utilities
+  types/
+    index.ts      # All shared TypeScript types
+```
+
+---
+
+## Database – Neon DB Rules
+- Use `@neondatabase/serverless` with the `neon()` tagged template literal
+- All queries go in `src/lib/db/`
+- Schema is raw SQL (no ORM) – keep a `schema.sql` at the root
+- Use parameterized queries ALWAYS – never string interpolation in SQL
+- Table names: `users`, `categories`, `nominees`, `votes`, `approved_emails`
+
+### Core Schema Shape
+```sql
+-- approved_emails: predefined list set by admin
+-- users: id, name, email, role (user|producer|admin), status (approved|pending|rejected), created_at
+-- categories: id, name, description, is_active, created_at
+-- nominees: id, name, category_id, image_url (Cloudinary URL stored as text), created_at
+-- votes: id, user_id, category_id, nominee_id, created_at
+-- UNIQUE constraint on (user_id, category_id) to prevent duplicate votes
+```
+
+---
+
+## Authentication Rules
+- Use NextAuth.js v5 (Auth.js) – Email magic link or credentials
+- Session strategy: JWT
+- On sign-in: check `approved_emails` table → if found, auto-approve; else mark as `pending`
+- Protect routes via middleware (`src/middleware.ts`)
+- Role checks: always server-side via `auth()` or session – never trust client-side role
+
+---
+
+## Role-Based Access
+| Route | Roles Allowed |
+|---|---|
+| `/vote` | `approved` users only |
+| `/results` | all authenticated users |
+| `/admin/*` | `producer`, `admin` |
+| `/admin/users` | `admin` only (manage roles) |
+
+---
+
+## Voting Rules (enforce server-side)
+1. One vote per user per category – enforced by DB UNIQUE constraint
+2. Only `approved` users can vote – check status on every vote API call
+3. All votes server-action or API route – never client-side only
+4. Return clear error if user has already voted in that category
+
+---
+
+## Award Categories (IT-Gullruten 2026)
+Seed these in the database by default:
+1. Beste medieprodukt
+2. Beste IT-produkt
+3. Beste nettside
+4. Beste app
+5. Beste konsept
+6. Beste kortfilm
+7. Mest originale idé
+8. Beste spill
+9. Beste animasjon
+10. Beste historiefortelling
+
+---
+
+## Component Rules
+- All components: TypeScript with explicit prop types
+- Use `"use client"` only when strictly necessary (event handlers, browser APIs)
+- Prefer Server Components by default
+- Form submissions: use Next.js Server Actions
+- Loading states: use `Suspense` + skeleton components
+- Error states: always handle and display user-friendly messages
+
+---
+
+## Code Quality
+- No `any` types – use `unknown` and narrow properly
+- Zod for all form and API input validation
+- `eslint` + `prettier` – follow the project config
+- No unused imports or variables
+- Comment non-obvious logic, but don't over-comment
+
+---
+
+## Naming Conventions
+- Files/folders: `kebab-case`
+- Components: `PascalCase`
+- Functions/variables: `camelCase`
+- DB columns: `snake_case`
+- Constants: `SCREAMING_SNAKE_CASE`
+- Types/Interfaces: `PascalCase`, prefix interfaces with `I` only if needed for clarity
+
+---
+
+## Do Not
+- Do not use `npm` or `yarn` – pnpm only
+- Do not change any color values
+- Do not change the font families
+- Do not use Prisma – raw SQL with Neon serverless driver
+- Do not use `any` TypeScript type
+- Do not store sensitive data in client components
+- Do not skip server-side role/auth checks
+- Do not use Cloudinary SDK – store image URLs as plain text from manual uploads
