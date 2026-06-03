@@ -90,3 +90,19 @@ export async function deleteNominee(id: number): Promise<void> {
   const sql = getSql();
   await sql`DELETE FROM nominees WHERE id = ${id}`;
 }
+
+export async function countNomineesByCategory(): Promise<
+  Record<number, number>
+> {
+  const sql = getSql();
+  const rows = await sql`
+    SELECT category_id, COUNT(*)::int AS count
+    FROM nominees
+    GROUP BY category_id
+  `;
+  const counts: Record<number, number> = {};
+  for (const row of rows as { category_id: number; count: number }[]) {
+    counts[row.category_id] = row.count;
+  }
+  return counts;
+}

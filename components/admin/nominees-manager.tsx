@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import type { Category, Nominee, User } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { getVisibleNomineeFields } from "@/lib/voting/category-layout";
 import { DataTable } from "./data-table";
 
 type NomineeRow = Nominee & { category_name: string };
@@ -13,25 +14,6 @@ interface NomineesManagerProps {
   nominees: NomineeRow[];
   categories: Category[];
   users: User[];
-}
-
-// Category name to optional fields mapping (case-insensitive)
-const CATEGORY_FIELDS_MAP: Record<string, string[]> = {
-  "beste medieproduksjon": ["description"],
-  "beste medieprudukt": ["description"],
-  "beste it-produkt": ["description", "site_url"],
-  "beste app": ["description", "site_url"],
-  "beste konsept": ["description"],
-  "beste kortfilm": ["description", "video_url"],
-  "mest originale idé": ["description", "what_we_made"],
-  "beste interaktiv": ["description", "site_url"],
-  "beste animasjon": [],
-  "beste historiefortelling": ["description"],
-};
-
-function getVisibleFields(categoryName: string): string[] {
-  const normalized = categoryName.trim().toLowerCase();
-  return CATEGORY_FIELDS_MAP[normalized] || [];
 }
 
 function getCategoryName(categoryId: string, categories: Category[]): string {
@@ -57,7 +39,9 @@ export function NomineesManager({
   const [whatWeMade, setWhatWeMade] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const visibleFields = getVisibleFields(getCategoryName(categoryId, categories));
+  const visibleFields = getVisibleNomineeFields(
+    getCategoryName(categoryId, categories),
+  );
 
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault();

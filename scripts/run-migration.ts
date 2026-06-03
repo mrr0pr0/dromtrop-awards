@@ -33,14 +33,20 @@ async function main() {
   const pool = new Pool({ connectionString: databaseUrl });
   const root = join(process.cwd());
 
-  const migration = readFileSync(
+  const nomineeFields = readFileSync(
     join(root, "scripts", "add-nominee-fields-migration.sql"),
+    "utf-8",
+  );
+  const renameSpill = readFileSync(
+    join(root, "scripts", "rename-beste-spill.sql"),
     "utf-8",
   );
 
   console.log("Applying nominee fields migration...");
-  await pool.query(migration);
-  console.log("✓ Migration complete!");
+  await pool.query(nomineeFields);
+  console.log("Renaming Beste spill → Beste Interaktiv...");
+  await pool.query(renameSpill);
+  console.log("✓ Migrations complete!");
 
   await pool.end();
 }
