@@ -70,14 +70,10 @@ export const fullAuthConfig: NextAuthConfig = {
       const email = token.email ?? user?.email;
       if (!email) return token;
 
-      if (user || trigger === "update") {
-        const dbUser = await findUserByEmail(email);
-        if (dbUser) {
-          token.id = dbUser.id;
-          token.role = dbUser.role;
-          token.status = dbUser.status;
-        }
-      } else if (!token.id) {
+      // On sign-in or explicit session refresh: re-read from DB so role/status
+      // changes are picked up immediately. Skip for normal requests where the
+      // token is already fully populated — avoids a DB hit on every API call.
+      if (user || trigger === "update" || !token.id) {
         const dbUser = await findUserByEmail(email);
         if (dbUser) {
           token.id = dbUser.id;

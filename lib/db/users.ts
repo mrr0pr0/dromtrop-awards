@@ -1,8 +1,7 @@
-import { getSql } from "./client";
+import { sql } from "./client";
 import type { User, UserRole, UserStatus } from "@/types";
 
 export async function findUserByEmail(email: string): Promise<User | null> {
-  const sql = getSql();
   const rows = await sql`
     SELECT id, name, email, password_hash, role, status, created_at
     FROM users WHERE LOWER(email) = LOWER(${email}) LIMIT 1
@@ -11,7 +10,6 @@ export async function findUserByEmail(email: string): Promise<User | null> {
 }
 
 export async function findUserById(id: string): Promise<User | null> {
-  const sql = getSql();
   const rows = await sql`
     SELECT id, name, email, password_hash, role, status, created_at
     FROM users WHERE id = ${id} LIMIT 1
@@ -25,7 +23,6 @@ export async function upsertUserOnSignIn(params: {
   name?: string | null;
   status: UserStatus;
 }): Promise<User> {
-  const sql = getSql();
   const bootstrapAdmin = process.env.BOOTSTRAP_ADMIN_EMAIL?.toLowerCase();
   const role: UserRole =
     bootstrapAdmin && params.email.toLowerCase() === bootstrapAdmin
@@ -47,14 +44,12 @@ export async function setUserPasswordHash(
   id: string,
   passwordHash: string,
 ): Promise<void> {
-  const sql = getSql();
   await sql`
     UPDATE users SET password_hash = ${passwordHash} WHERE id = ${id}
   `;
 }
 
 export async function listUsers(): Promise<User[]> {
-  const sql = getSql();
   const rows = await sql`
     SELECT id, name, email, role, status, created_at
     FROM users ORDER BY created_at DESC
@@ -63,7 +58,6 @@ export async function listUsers(): Promise<User[]> {
 }
 
 export async function listPendingUsers(): Promise<User[]> {
-  const sql = getSql();
   const rows = await sql`
     SELECT id, name, email, role, status, created_at
     FROM users WHERE status = 'pending' ORDER BY created_at DESC
@@ -75,23 +69,19 @@ export async function updateUserStatus(
   id: string,
   status: UserStatus,
 ): Promise<User | null> {
-  const sql = getSql();
   const rows = await sql`
     UPDATE users SET status = ${status} WHERE id = ${id}
     RETURNING id, name, email, role, status, created_at
   `;
   const user = (rows[0] as User) ?? null;
 
-  // Sync approved_emails table when status changes
   if (user) {
     if (status === "approved") {
-      // Add email to approved list
       await sql`
         INSERT INTO approved_emails (email) VALUES (${user.email.toLowerCase()})
         ON CONFLICT (email) DO NOTHING
       `;
     } else if (status === "pending") {
-      // Remove email from approved list
       await sql`
         DELETE FROM approved_emails WHERE LOWER(email) = LOWER(${user.email})
       `;
@@ -105,7 +95,6 @@ export async function updateUserRole(
   id: string,
   role: UserRole,
 ): Promise<User | null> {
-  const sql = getSql();
   const rows = await sql`
     UPDATE users SET role = ${role} WHERE id = ${id}
     RETURNING id, name, email, role, status, created_at
@@ -114,7 +103,6 @@ export async function updateUserRole(
 }
 
 export async function countApprovedUsers(): Promise<number> {
-  const sql = getSql();
   const rows = await sql`
     SELECT COUNT(*)::int AS count FROM users WHERE status = 'approved'
   `;
@@ -122,7 +110,6 @@ export async function countApprovedUsers(): Promise<number> {
 }
 
 export async function countPendingUsers(): Promise<number> {
-  const sql = getSql();
   const rows = await sql`
     SELECT COUNT(*)::int AS count FROM users WHERE status = 'pending'
   `;
@@ -130,7 +117,6 @@ export async function countPendingUsers(): Promise<number> {
 }
 
 export async function getRecentUsers(limit = 5): Promise<User[]> {
-  const sql = getSql();
   const rows = await sql`
     SELECT id, name, email, role, status, created_at
     FROM users ORDER BY created_at DESC LIMIT ${limit}
