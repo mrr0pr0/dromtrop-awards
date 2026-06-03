@@ -135,11 +135,11 @@ export function VoteDashboard({
             Stemmegivning
           </p>
           <h1 className="mt-3 font-[family-name:var(--font-display)] text-4xl leading-[0.96] text-gold sm:text-5xl md:text-6xl lg:text-7xl">
-            Velg favoritten i hver kategori.
+            Stem på din favorit
           </h1>
           <p className="mt-4 max-w-xl text-base leading-relaxed text-white/80 md:text-lg">
-            Kategoriene er samlet i tydelige seksjoner. Les kort om hvert bidrag,
-            åpne detaljer ved behov, og stem når du er klar.
+            Din stemme teller! Velg prosjektet du mener fortjener å vinne Drømtorp Awards.
+            
           </p>
         </div>
         <aside

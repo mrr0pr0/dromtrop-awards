@@ -59,8 +59,7 @@ export default async function HomePage() {
               Kategorier
             </h2>
             <p className="max-w-md text-sm text-gold-light">
-              Alle kategoriene fra stemmesiden, samlet i kort som fungerer på
-              mobil, nettbrett og desktop.
+              
             </p>
           </div>
 
