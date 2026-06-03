@@ -1,51 +1,55 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 :root {
-  --color-gold: #c9a84c;
-  --color-gold-light: #e8d5a3;
-  --color-gold-deep: #8b6914;
-  --color-black: #1c1c1c;
-  --color-charcoal: #2d2d2d;
-  --color-parchment: #faf8f4;
-  --color-white: #ffffff;
-  --color-success: #2f7d4e;
+	--color-gold: #c9a84c;
+	--color-gold-light: #e8d5a3;
+	--color-gold-deep: #8b6914;
+	--color-black: #1c1c1c;
+	--color-charcoal: #2d2d2d;
+	--color-parchment: #faf8f4;
+	--color-white: #ffffff;
+	--color-success: #2f7d4e;
 }
 
 @theme inline {
-  --color-gold: var(--color-gold);
-  --color-gold-light: var(--color-gold-light);
-  --color-gold-deep: var(--color-gold-deep);
-  --color-black: var(--color-black);
-  --color-charcoal: var(--color-charcoal);
-  --color-parchment: var(--color-parchment);
-  --color-white: var(--color-white);
-  --color-success: var(--color-success);
-  --font-display: var(--font-display);
-  --font-body: var(--font-body);
+	--color-gold: var(--color-gold);
+	--color-gold-light: var(--color-gold-light);
+	--color-gold-deep: var(--color-gold-deep);
+	--color-black: var(--color-black);
+	--color-charcoal: var(--color-charcoal);
+	--color-parchment: var(--color-parchment);
+	--color-white: var(--color-white);
+	--color-success: var(--color-success);
+	--font-display: var(--font-display);
+	--font-body: var(--font-body);
 }
 
 @keyframes rise {
-  from {
-    opacity: 0;
-    transform: translateY(12px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+	from {
+		opacity: 0;
+		transform: translateY(12px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .motion-safe\:animate-\[rise_520ms_ease_both\] {
-    animation: none !important;
-  }
+	.motion-safe\:animate-\[rise_520ms_ease_both\] {
+		animation: none !important;
+	}
 }
 
 body {
-  background:
-    radial-gradient(circle at 12% 0%, rgba(201, 168, 76, 0.1), transparent 32rem),
-    var(--color-black);
-  color: var(--color-white);
-  font-family: var(--font-body), system-ui, sans-serif;
-  transition: all 0.2s ease;
+	background:
+		radial-gradient(
+			circle at 12% 0%,
+			rgba(201, 168, 76, 0.1),
+			transparent 32rem
+		),
+		var(--color-black);
+	color: var(--color-white);
+	font-family: var(--font-body), system-ui, sans-serif;
+	transition: all 0.2s ease;
 }
