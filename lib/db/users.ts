@@ -70,7 +70,25 @@ export async function updateUserStatus(
     UPDATE users SET status = ${status} WHERE id = ${id}
     RETURNING id, name, email, role, status, created_at
   `;
-  return (rows[0] as User) ?? null;
+  const user = (rows[0] as User) ?? null;
+
+  // Sync approved_emails table when status changes
+  if (user) {
+    if (status === "approved") {
+      // Add email to approved list
+      await sql`
+        INSERT INTO approved_emails (email) VALUES (${user.email.toLowerCase()})
+        ON CONFLICT (email) DO NOTHING
+      `;
+    } else if (status === "pending") {
+      // Remove email from approved list
+      await sql`
+        DELETE FROM approved_emails WHERE LOWER(email) = LOWER(${user.email})
+      `;
+    }
+  }
+
+  return user;
 }
 
 export async function updateUserRole(
