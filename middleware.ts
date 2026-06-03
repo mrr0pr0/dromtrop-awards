@@ -40,7 +40,7 @@ export default auth((req) => {
     return NextResponse.redirect(new URL("/login?error=rejected", req.url));
   }
 
-  if (pathname.startsWith("/vote") && status !== "approved") {
+  if (pathname.startsWith("/vote") && status !== "approved" && role !== "admin" && role !== "producer") {
     return NextResponse.redirect(
       new URL("/login?error=pending", req.url),
     );
