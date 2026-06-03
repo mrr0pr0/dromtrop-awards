@@ -28,6 +28,7 @@ export interface Nominee {
   id: number;
   name: string;
   category_id: number;
+  user_id: string | null;
   image_url: string | null;
   created_at: Date;
 }

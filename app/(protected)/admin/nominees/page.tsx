@@ -2,12 +2,14 @@ export const dynamic = "force-dynamic";
 
 import { listCategories } from "@/lib/db/categories";
 import { listAllNominees } from "@/lib/db/nominees";
+import { listUsers } from "@/lib/db/users";
 import { NomineesManager } from "@/components/admin/nominees-manager";
 
 export default async function AdminNomineesPage() {
-  const [nominees, categories] = await Promise.all([
+  const [nominees, categories, users] = await Promise.all([
     listAllNominees(),
     listCategories(),
+    listUsers(),
   ]);
 
   return (
@@ -17,7 +19,7 @@ export default async function AdminNomineesPage() {
         Legg til og administrer nominerte per kategori.
       </p>
       <div className="mt-6">
-        <NomineesManager nominees={nominees} categories={categories} />
+        <NomineesManager nominees={nominees} categories={categories} users={users} />
       </div>
     </div>
   );

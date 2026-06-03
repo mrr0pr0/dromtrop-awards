@@ -37,6 +37,13 @@ export async function POST(req: Request) {
     );
   }
 
+  if (nominee.user_id === session!.user!.id) {
+    return Response.json(
+      { error: "Du kan ikke stemme på deg selv." },
+      { status: 400 },
+    );
+  }
+
   try {
     const vote = await castVote({
       userId: session!.user!.id,

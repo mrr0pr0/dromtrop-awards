@@ -37,6 +37,7 @@ CREATE TABLE IF NOT EXISTS nominees (
   id SERIAL PRIMARY KEY,
   name TEXT NOT NULL,
   category_id INTEGER NOT NULL REFERENCES categories(id) ON DELETE CASCADE,
+  user_id TEXT REFERENCES users(id) ON DELETE CASCADE,
   image_url TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );

@@ -33,6 +33,7 @@ export default async function VotePage() {
         <CategoryList
           categories={categoriesWithNominees}
           userVotes={userVotes}
+          currentUserId={session?.user?.id}
         />
       </div>
     </div>

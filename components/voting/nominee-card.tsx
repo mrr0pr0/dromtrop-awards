@@ -11,6 +11,7 @@ interface NomineeCardProps {
   hasVoted: boolean;
   isVoting: boolean;
   onVote: (nomineeId: number) => void;
+  isOwnNominee?: boolean;
 }
 
 export function NomineeCard({
@@ -19,6 +20,7 @@ export function NomineeCard({
   hasVoted,
   isVoting,
   onVote,
+  isOwnNominee,
 }: NomineeCardProps) {
   return (
     <div
@@ -45,6 +47,10 @@ export function NomineeCard({
         {hasVoted ? (
           <p className="text-xs text-gold-light">
             {isSelected ? "Din stemme" : "Du har allerede stemt i denne kategorien"}
+          </p>
+        ) : isOwnNominee ? (
+          <p className="text-xs text-gold-light">
+            Du kan ikke stemme på deg selv
           </p>
         ) : (
           <Button

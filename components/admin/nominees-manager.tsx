@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import type { Category, Nominee } from "@/types";
+import type { Category, Nominee, User } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DataTable } from "./data-table";
@@ -12,17 +12,20 @@ type NomineeRow = Nominee & { category_name: string };
 interface NomineesManagerProps {
   nominees: NomineeRow[];
   categories: Category[];
+  users: User[];
 }
 
 export function NomineesManager({
   nominees,
   categories,
+  users,
 }: NomineesManagerProps) {
   const router = useRouter();
   const [name, setName] = useState("");
   const [categoryId, setCategoryId] = useState(
     categories[0]?.id?.toString() ?? "",
   );
+  const [userId, setUserId] = useState("");
   const [imageUrl, setImageUrl] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -35,10 +38,12 @@ export function NomineesManager({
       body: JSON.stringify({
         name,
         category_id: Number(categoryId),
+        user_id: userId || null,
         image_url: imageUrl || null,
       }),
     });
     setName("");
+    setUserId("");
     setImageUrl("");
     setLoading(false);
     router.refresh();
@@ -70,6 +75,21 @@ export function NomineesManager({
             {categories.map((c) => (
               <option key={c.id} value={c.id}>
                 {c.name}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="flex flex-col gap-1.5">
+          <label className="text-sm font-medium text-gold-light">Bruker (valgfritt - for å forhindre selvomår)</label>
+          <select
+            value={userId}
+            onChange={(e) => setUserId(e.target.value)}
+            className="rounded-lg border border-gold/30 bg-charcoal px-4 py-3 text-sm text-white"
+          >
+            <option value="">-- Velg bruker (valgfritt) --</option>
+            {users.map((u) => (
+              <option key={u.id} value={u.id}>
+                {u.name || u.email}
               </option>
             ))}
           </select>

@@ -3,6 +3,7 @@ import { z } from "zod";
 export const nomineeSchema = z.object({
   name: z.string().min(1, "Navn er påkrevd"),
   category_id: z.coerce.number().int().positive(),
+  user_id: z.string().optional().nullable(),
   image_url: z
     .union([z.string().url(), z.literal(""), z.null()])
     .optional()

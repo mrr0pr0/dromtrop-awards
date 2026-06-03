@@ -6,7 +6,7 @@ export async function listNomineesByCategory(
 ): Promise<Nominee[]> {
   const sql = getSql();
   const rows = await sql`
-    SELECT id, name, category_id, image_url, created_at
+    SELECT id, name, category_id, user_id, image_url, created_at
     FROM nominees WHERE category_id = ${categoryId} ORDER BY name ASC
   `;
   return rows as Nominee[];
@@ -17,7 +17,7 @@ export async function listAllNominees(): Promise<
 > {
   const sql = getSql();
   const rows = await sql`
-    SELECT n.id, n.name, n.category_id, n.image_url, n.created_at, c.name AS category_name
+    SELECT n.id, n.name, n.category_id, n.user_id, n.image_url, n.created_at, c.name AS category_name
     FROM nominees n
     JOIN categories c ON c.id = n.category_id
     ORDER BY c.id ASC, n.name ASC
@@ -28,7 +28,7 @@ export async function listAllNominees(): Promise<
 export async function getNomineeById(id: number): Promise<Nominee | null> {
   const sql = getSql();
   const rows = await sql`
-    SELECT id, name, category_id, image_url, created_at
+    SELECT id, name, category_id, user_id, image_url, created_at
     FROM nominees WHERE id = ${id} LIMIT 1
   `;
   return (rows[0] as Nominee) ?? null;
@@ -37,13 +37,14 @@ export async function getNomineeById(id: number): Promise<Nominee | null> {
 export async function createNominee(data: {
   name: string;
   category_id: number;
+  user_id?: string | null;
   image_url?: string | null;
 }): Promise<Nominee> {
   const sql = getSql();
   const rows = await sql`
-    INSERT INTO nominees (name, category_id, image_url)
-    VALUES (${data.name}, ${data.category_id}, ${data.image_url ?? null})
-    RETURNING id, name, category_id, image_url, created_at
+    INSERT INTO nominees (name, category_id, user_id, image_url)
+    VALUES (${data.name}, ${data.category_id}, ${data.user_id ?? null}, ${data.image_url ?? null})
+    RETURNING id, name, category_id, user_id, image_url, created_at
   `;
   return rows[0] as Nominee;
 }
@@ -53,6 +54,7 @@ export async function updateNominee(
   data: {
     name?: string;
     category_id?: number;
+    user_id?: string | null;
     image_url?: string | null;
   },
 ): Promise<Nominee | null> {
@@ -64,9 +66,10 @@ export async function updateNominee(
     UPDATE nominees SET
       name = ${data.name ?? existing.name},
       category_id = ${data.category_id ?? existing.category_id},
+      user_id = ${data.user_id !== undefined ? data.user_id : existing.user_id},
       image_url = ${data.image_url !== undefined ? data.image_url : existing.image_url}
     WHERE id = ${id}
-    RETURNING id, name, category_id, image_url, created_at
+    RETURNING id, name, category_id, user_id, image_url, created_at
   `;
   return (rows[0] as Nominee) ?? null;
 }

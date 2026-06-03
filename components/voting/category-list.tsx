@@ -12,9 +12,10 @@ interface CategoryWithNominees {
 interface CategoryListProps {
   categories: CategoryWithNominees[];
   userVotes: Vote[];
+  currentUserId?: string;
 }
 
-export function CategoryList({ categories, userVotes }: CategoryListProps) {
+export function CategoryList({ categories, userVotes, currentUserId }: CategoryListProps) {
   const [votingKey, setVotingKey] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [localVotes, setLocalVotes] = useState(userVotes);
@@ -104,6 +105,7 @@ export function CategoryList({ categories, userVotes }: CategoryListProps) {
                     hasVoted={hasVoted}
                     isVoting={votingKey === `${category.id}-${nominee.id}`}
                     onVote={(id) => handleVote(category.id, id)}
+                    isOwnNominee={currentUserId && nominee.user_id === currentUserId}
                   />
                 ))}
               </div>
