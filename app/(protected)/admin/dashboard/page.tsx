@@ -30,7 +30,7 @@ export default async function AdminDashboardPage() {
   return (
     <div>
       <h1 className="text-3xl font-semibold text-white">Oversikt</h1>
-      <p className="mt-1 text-sm text-gold-light">Admin-dashbord for IT-Gullruten</p>
+      <p className="mt-1 text-sm text-gold-light">Admin-dashbord for Drømtorp Awards 2026</p>
 
       <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard label="Totalt stemmer" value={totalVotes} />

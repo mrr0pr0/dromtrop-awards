@@ -10,7 +10,7 @@ export default async function AdminCategoriesPage() {
     <div>
       <h1 className="text-3xl font-semibold text-white">Kategorier</h1>
       <p className="mt-1 text-sm text-gold-light">
-        Administrer priskategorier for IT-Gullruten 2026.
+        Administrer priskategorier for Drømtorp Awards 2026.
       </p>
       <div className="mt-6">
         <CategoriesManager initialCategories={categories} />

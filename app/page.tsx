@@ -16,7 +16,7 @@ export default async function HomePage() {
       <Navbar />
       <main className="flex flex-1 flex-col items-center justify-center px-4 py-24 text-center">
         <h1 className="font-[family-name:var(--font-display)] text-5xl font-light text-gold md:text-7xl">
-          IT-Gullruten
+          Drømtorp Awards
         </h1>
         <p className="mt-4 max-w-lg text-sm text-gold-light">
           Velkommen til den offisielle publikumsstemmen for Drømtorp Awards.

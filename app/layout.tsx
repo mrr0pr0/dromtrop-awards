@@ -16,7 +16,7 @@ const montserrat = Montserrat({
 });
 
 export const metadata: Metadata = {
-  title: "IT-Gullruten | Drømtorp Awards",
+  title: "Drømtorp Awards",
   description: "Offisiell publikumsstemme for Drømtorp Awards",
 };
 

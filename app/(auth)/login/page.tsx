@@ -34,7 +34,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
     <div className="flex min-h-screen flex-col items-center justify-center bg-black px-4">
       <div className="mb-8 text-center">
         <h1 className="font-[family-name:var(--font-display)] text-5xl font-light text-gold md:text-6xl">
-          IT-Gullruten
+          Drømtorp Awards
         </h1>
         <p className="mt-2 text-sm text-gold-light">
           Offisiell publikumsstemme for Drømtorp Awards

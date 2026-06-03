@@ -15,7 +15,7 @@ export async function Navbar() {
           href="/"
           className="font-[family-name:var(--font-display)] text-2xl font-light text-gold transition-all duration-200 hover:text-gold-light"
         >
-          IT-Gullruten
+          Drømtorp Awards
         </Link>
 
         <div className="flex items-center gap-6 text-sm">
