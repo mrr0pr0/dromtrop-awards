@@ -8,7 +8,7 @@ export default function NomineeDetailLayout({
 }) {
   return (
     <div className="min-h-screen bg-black text-white">
-      <Navbar activePath="vote" />
+      <Navbar />
       <main className="mx-auto w-full max-w-[1180px] flex-1 px-4 py-8 pb-20 md:py-10">
         {children}
       </main>
