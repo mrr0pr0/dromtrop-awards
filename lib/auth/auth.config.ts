@@ -6,7 +6,6 @@ export const authConfig = {
   trustHost: true,
   pages: {
     signIn: "/login",
-    verifyRequest: "/login?verify=1",
   },
   session: { strategy: "jwt" },
   providers: [],

@@ -4,7 +4,7 @@ import type { User, UserRole, UserStatus } from "@/types";
 export async function findUserByEmail(email: string): Promise<User | null> {
   const sql = getSql();
   const rows = await sql`
-    SELECT id, name, email, role, status, created_at
+    SELECT id, name, email, password_hash, role, status, created_at
     FROM users WHERE LOWER(email) = LOWER(${email}) LIMIT 1
   `;
   return (rows[0] as User) ?? null;
@@ -13,7 +13,7 @@ export async function findUserByEmail(email: string): Promise<User | null> {
 export async function findUserById(id: string): Promise<User | null> {
   const sql = getSql();
   const rows = await sql`
-    SELECT id, name, email, role, status, created_at
+    SELECT id, name, email, password_hash, role, status, created_at
     FROM users WHERE id = ${id} LIMIT 1
   `;
   return (rows[0] as User) ?? null;
@@ -41,6 +41,16 @@ export async function upsertUserOnSignIn(params: {
     RETURNING id, name, email, role, status, created_at
   `;
   return rows[0] as User;
+}
+
+export async function setUserPasswordHash(
+  id: string,
+  passwordHash: string,
+): Promise<void> {
+  const sql = getSql();
+  await sql`
+    UPDATE users SET password_hash = ${passwordHash} WHERE id = ${id}
+  `;
 }
 
 export async function listUsers(): Promise<User[]> {

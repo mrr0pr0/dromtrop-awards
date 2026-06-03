@@ -105,7 +105,7 @@ export function CategoryList({ categories, userVotes, currentUserId }: CategoryL
                     hasVoted={hasVoted}
                     isVoting={votingKey === `${category.id}-${nominee.id}`}
                     onVote={(id) => handleVote(category.id, id)}
-                    isOwnNominee={currentUserId && nominee.user_id === currentUserId}
+                    isOwnNominee={!!currentUserId && nominee.user_id === currentUserId}
                   />
                 ))}
               </div>

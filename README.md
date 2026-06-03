@@ -6,7 +6,7 @@ Offisiell publikumsstemme-plattform for Drømtorp Awards ved Drømtorp videregå
 
 - Next.js 16 (App Router) + TypeScript
 - Neon PostgreSQL (`@neondatabase/serverless`)
-- NextAuth.js v5 (e-post magic link via Resend)
+- NextAuth.js v5 (email + password credentials)
 - Tailwind CSS v4
 
 ## Kom i gang
@@ -26,8 +26,6 @@ Kopier `.env.example` til `.env` og fyll inn:
 | `DATABASE_URL` | Neon connection string |
 | `AUTH_SECRET` | `openssl rand -base64 32` |
 | `AUTH_URL` | `http://localhost:3000` (produksjon: din domene-URL) |
-| `RESEND_API_KEY` | Fra [Resend](https://resend.com) |
-| `EMAIL_FROM` | Verifisert avsender hos Resend |
 | `BOOTSTRAP_ADMIN_EMAIL` | (valgfritt) Første innlogging med denne e-posten får `admin`-rolle |
 
 ### 3. Database
@@ -40,11 +38,14 @@ pnpm db:push
 
 Eller lim inn `schema.sql` og `scripts/seed.sql` manuelt i Neon SQL Editor.
 
-Legg godkjente stemmere i `approved_emails`:
+Legg godkjente brukere i `users`:
 
 ```sql
-INSERT INTO approved_emails (email) VALUES ('elev@skole.no');
+INSERT INTO users (id, email, status)
+VALUES (gen_random_uuid()::text, 'elev@skole.no', 'approved');
 ```
+
+Ved første innlogging lagres passordet brukeren skriver inn som `password_hash`.
 
 ### 4. Start utviklingsserver
 
@@ -73,7 +74,6 @@ pnpm dev
 
 - Legg inn alle miljøvariabler i Vercel-prosjektet
 - Sett `AUTH_URL` til produksjons-URL
-- Verifiser domene hos Resend for `EMAIL_FROM`
 
 ## Lisens
 
