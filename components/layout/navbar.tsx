@@ -9,16 +9,16 @@ export async function Navbar() {
   const isStaff = isProducerOrAdmin(session);
 
   return (
-    <header className="border-b border-gold/20 bg-black">
-      <nav className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
+    <header className="sticky top-0 z-20 border-b border-gold-light/20 bg-black/95 backdrop-blur">
+      <nav className="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
         <Link
           href="/"
-          className="font-[family-name:var(--font-display)] text-2xl font-light text-gold transition-all duration-200 hover:text-gold-light"
+          className="shrink-0 font-[family-name:var(--font-display)] text-2xl font-light text-gold transition-all duration-200 hover:text-gold-light"
         >
           Drømtorp Awards
         </Link>
 
-        <div className="flex items-center gap-6 text-sm">
+        <div className="flex items-center gap-4 overflow-x-auto text-sm font-medium [scrollbar-width:none] sm:gap-6 [&::-webkit-scrollbar]:hidden">
           {user?.email ? (
             <>
               {canVote(session) && (

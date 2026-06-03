@@ -23,7 +23,9 @@
 }
 
 body {
-  background: var(--color-black);
+  background:
+    radial-gradient(circle at 12% 0%, rgba(201, 168, 76, 0.1), transparent 32rem),
+    var(--color-black);
   color: var(--color-white);
   font-family: var(--font-body), system-ui, sans-serif;
   transition: all 0.2s ease;
