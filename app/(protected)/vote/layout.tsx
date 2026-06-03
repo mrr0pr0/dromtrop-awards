@@ -8,7 +8,7 @@ export default function VoteLayout({
 }) {
   return (
     <div className="min-h-screen bg-black">
-      <Navbar activePath="vote" />
+      <Navbar />
       <main className="mx-auto w-full max-w-[1180px] flex-1 px-3 py-7 sm:px-4 sm:py-10 md:py-14">
         {children}
       </main>

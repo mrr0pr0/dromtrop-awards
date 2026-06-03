@@ -1,18 +1,34 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
-import { auth } from "@/auth";
-import { signOut } from "@/auth";
-import { canVote, isProducerOrAdmin } from "@/lib/auth/permissions";
+import { usePathname } from "next/navigation";
+import { signOut } from "next-auth/react";
+import { isProducerOrAdmin, canVote } from "@/lib/auth/permissions";
 import { cn } from "@/lib/utils/cn";
+import type { Session } from "next-auth";
 
-interface VoteNavbarProps {
-  activePath?: "vote" | "home" | "results" | "admin";
+interface NavbarClientProps {
+  session: Session | null;
+  activePath?: "home" | "vote" | "results" | "admin";
 }
 
-export async function VoteNavbar({ activePath = "vote" }: VoteNavbarProps) {
-  const session = await auth();
+export function NavbarClient({ session, activePath: activePathProp }: NavbarClientProps) {
+  const pathname = usePathname();
   const user = session?.user;
   const isStaff = isProducerOrAdmin(session);
+
+  // Determine active path based on prop or pathname
+  const getActivePath = () => {
+    if (activePathProp) return activePathProp;
+    if (pathname === "/") return "home";
+    if (pathname.startsWith("/vote")) return "vote";
+    if (pathname.startsWith("/results")) return "results";
+    if (pathname.startsWith("/admin")) return "admin";
+    return "home";
+  };
+
+  const activePath = getActivePath();
 
   return (
     <header className="sticky top-0 z-20 flex min-h-[72px] flex-wrap items-center gap-3 border-b border-gold/40 bg-black/95 px-4 py-3 text-white sm:gap-5 sm:px-8 lg:px-14">
@@ -89,24 +105,16 @@ export async function VoteNavbar({ activePath = "vote" }: VoteNavbarProps) {
           </span>
         )}
         {user?.email ? (
-          <form
-            action={async () => {
-              "use server";
-              await signOut({ redirectTo: "/" });
-            }}
-            className="shrink-0"
+          <button
+            onClick={() => signOut({ callbackUrl: "/" })}
+            className="inline-flex min-h-10 items-center rounded-lg px-3 text-sm text-white/80 transition-colors hover:bg-white/10 hover:text-white"
           >
-            <button
-              type="submit"
-              className="inline-flex min-h-10 items-center rounded-lg px-3 text-sm text-white/80 transition-colors hover:bg-white/10 hover:text-white"
-            >
-              Logg ut
-            </button>
-          </form>
+            Logg ut
+          </button>
         ) : (
           <Link
             href="/login"
-            className="inline-flex min-h-10 items-center rounded-lg bg-gold px-3 text-sm font-bold text-black"
+            className="inline-flex min-h-10 items-center rounded-lg px-3 text-sm text-white/80 transition-colors hover:bg-white/10 hover:text-white"
           >
             Logg inn
           </Link>
