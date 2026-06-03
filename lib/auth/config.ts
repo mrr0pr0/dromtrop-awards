@@ -8,6 +8,7 @@ import {
 } from "@/lib/db/users";
 import type { UserRole, UserStatus } from "@/types";
 import { authConfig } from "./auth.config";
+import { isDevMagicLinkMode, setDevMagicLink } from "./dev-magic-link";
 
 function getResend() {
   return new Resend(process.env.RESEND_API_KEY);
@@ -28,6 +29,14 @@ export const fullAuthConfig: NextAuthConfig = {
       },
       from: process.env.EMAIL_FROM,
       async sendVerificationRequest({ identifier, url }) {
+        if (isDevMagicLinkMode()) {
+          setDevMagicLink(identifier, url);
+          console.info(
+            `\n[auth] Magic link for ${identifier} (dev only, not sent via email):\n${url}\n`,
+          );
+          return;
+        }
+
         const { error } = await getResend().emails.send({
           from:
             process.env.EMAIL_FROM ??
