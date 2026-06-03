@@ -128,16 +128,16 @@ export function VoteDashboard({
   });
 
   return (
-    <div className="text-black">
+    <div className="text-white">
       <section className="mb-7 grid items-end gap-5 md:grid-cols-[1.15fr_0.85fr] md:gap-12">
         <div>
-          <p className="font-mono text-xs font-extrabold uppercase tracking-wider text-gold-deep">
+          <p className="font-mono text-xs font-extrabold uppercase tracking-wider text-gold-light">
             Stemmegivning
           </p>
-          <h1 className="mt-3 font-[family-name:var(--font-display)] text-4xl leading-[0.96] text-black sm:text-5xl md:text-6xl lg:text-7xl">
+          <h1 className="mt-3 font-[family-name:var(--font-display)] text-4xl leading-[0.96] text-gold sm:text-5xl md:text-6xl lg:text-7xl">
             Velg favoritten i hver kategori.
           </h1>
-          <p className="mt-4 max-w-xl text-base leading-relaxed text-charcoal md:text-lg">
+          <p className="mt-4 max-w-xl text-base leading-relaxed text-white/80 md:text-lg">
             Kategoriene er samlet i tydelige seksjoner. Les kort om hvert bidrag,
             åpne detaljer ved behov, og stem når du er klar.
           </p>
@@ -173,7 +173,7 @@ export function VoteDashboard({
       </section>
 
       <section
-        className="mb-5 grid gap-3 rounded-[14px] border border-gold-deep/20 bg-white p-3.5 md:grid-cols-[1fr_auto]"
+        className="sticky top-3 z-10 mb-5 grid gap-3 rounded-[14px] border border-gold-light/20 bg-black/90 p-3.5 backdrop-blur md:grid-cols-[1fr_auto]"
         aria-label="Filtrer nominasjoner"
       >
         <label className="relative block">
@@ -183,10 +183,10 @@ export function VoteDashboard({
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Søk etter kategori eller nominert"
-            className="w-full min-h-[46px] rounded-[10px] border border-gold-deep/30 bg-parchment pl-11 pr-4 text-black outline-none transition-shadow focus:border-gold focus:ring-[3px] focus:ring-gold/20"
+            className="w-full min-h-[46px] rounded-[10px] border border-gold-light/30 bg-parchment/[0.08] pl-11 pr-4 text-white placeholder:text-white/40 outline-none transition-shadow focus:border-gold focus:ring-[3px] focus:ring-gold/20"
           />
           <span
-            className="pointer-events-none absolute left-4 top-1/2 h-3.5 w-3.5 -translate-y-[54%] rounded-full border-2 border-gold-deep"
+            className="pointer-events-none absolute left-4 top-1/2 h-3.5 w-3.5 -translate-y-[54%] rounded-full border-2 border-gold-light"
             aria-hidden
           />
         </label>
@@ -206,8 +206,8 @@ export function VoteDashboard({
               className={cn(
                 "min-h-[42px] shrink-0 rounded-full border px-3.5 text-sm transition-colors",
                 filter === mode
-                  ? "border-black bg-black text-white"
-                  : "border-gold-deep/30 bg-white text-charcoal",
+                  ? "border-gold-light bg-gold/10 text-gold-light"
+                  : "border-gold-light/25 bg-parchment/[0.04] text-white/70 hover:border-gold hover:bg-gold/10 hover:text-white",
               )}
             >
               {label}
@@ -217,7 +217,7 @@ export function VoteDashboard({
       </section>
 
       {error && (
-        <p className="mb-4 rounded-lg border border-gold-deep/40 bg-gold-deep/15 px-4 py-3 text-sm text-gold-deep">
+        <p className="mb-4 rounded-lg border border-gold/40 bg-gold/15 px-4 py-3 text-sm text-gold">
           {error}
         </p>
       )}
@@ -232,7 +232,7 @@ export function VoteDashboard({
 
         <div className="grid gap-4">
           {visibleCategories.length === 0 ? (
-            <p className="rounded-[16px] border border-gold-deep/20 bg-white p-6 text-charcoal">
+            <p className="rounded-[16px] border border-gold-light/20 bg-black/40 p-6 text-white/70">
               Ingen kategorier matcher søket.
             </p>
           ) : (
@@ -248,20 +248,20 @@ export function VoteDashboard({
                 <article
                   key={category.id}
                   id={slug}
-                  className="scroll-mt-28 overflow-hidden rounded-[16px] border border-gold-deep/20 bg-white shadow-[0_10px_24px_rgba(28,28,28,0.06)] motion-safe:animate-[rise_520ms_ease_both]"
+                  className="scroll-mt-28 overflow-hidden rounded-[16px] border border-gold-light/20 bg-black/40 backdrop-blur motion-safe:animate-[rise_520ms_ease_both]"
                 >
-                  <header className="grid gap-3 border-b border-gold-deep/20 bg-gradient-to-r from-gold-light/55 to-transparent px-5 py-5 sm:grid-cols-[1fr_auto] sm:px-6">
+                  <header className="grid gap-3 border-b border-gold-light/20 bg-gradient-to-r from-gold/10 to-transparent px-5 py-5 sm:grid-cols-[1fr_auto] sm:px-6">
                     <div>
-                      <h2 className="font-[family-name:var(--font-display)] text-2xl leading-tight text-black sm:text-3xl">
+                      <h2 className="font-[family-name:var(--font-display)] text-2xl leading-tight text-gold sm:text-3xl">
                         {category.name}
                       </h2>
-                      <p className="mt-2 max-w-xl text-sm leading-relaxed text-charcoal">
+                      <p className="mt-2 max-w-xl text-sm leading-relaxed text-white/70">
                         {list.length > 0
                           ? "Her ligger bidragene som er klare for vurdering. Kortet viser det viktigste først, med detaljer ett klikk unna."
                           : "Nominerte vises her når kategorien er klar."}
                       </p>
                     </div>
-                    <span className="inline-flex h-8 items-center self-start rounded-full border border-gold-deep/25 bg-parchment px-2.5 text-xs font-extrabold text-gold-deep">
+                    <span className="inline-flex h-8 items-center self-start rounded-full border border-gold-light/25 bg-parchment/[0.08] px-2.5 text-xs font-extrabold text-gold-light">
                       {list.length}{" "}
                       {list.length === 1 ? "nominert" : "nominerte"}
                     </span>
@@ -269,14 +269,14 @@ export function VoteDashboard({
 
                   {list.length === 0 ? (
                     <div className="grid grid-cols-[48px_minmax(0,1fr)] items-center gap-3.5 px-5 py-5 sm:px-6">
-                      <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-gold-deep/25 bg-parchment font-[family-name:var(--font-display)] text-2xl font-bold text-gold-deep">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-gold-light/25 bg-parchment/[0.08] font-[family-name:var(--font-display)] text-2xl font-bold text-gold-light">
                         0
                       </div>
                       <div>
-                        <strong className="block text-black">
+                        <strong className="block text-white">
                           Ingen nominerte ennå
                         </strong>
-                        <span className="mt-1 block text-sm text-charcoal">
+                        <span className="mt-1 block text-sm text-white/70">
                           Denne kategorien er synlig, men har ingen bidrag å stemme
                           på akkurat nå.
                         </span>
