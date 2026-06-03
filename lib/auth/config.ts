@@ -1,90 +1,71 @@
 import type { NextAuthConfig } from "next-auth";
-import { Resend } from "resend";
-import Email from "next-auth/providers/email";
-import { isEmailApproved } from "@/lib/db/approved-emails";
+import { CredentialsSignin } from "next-auth";
+import Credentials from "next-auth/providers/credentials";
 import {
   findUserByEmail,
-  upsertUserOnSignIn,
+  setUserPasswordHash,
 } from "@/lib/db/users";
-import type { UserRole, UserStatus } from "@/types";
 import { authConfig } from "./auth.config";
-import { isDevMagicLinkMode, setDevMagicLink } from "./dev-magic-link";
+import { hashPassword, verifyPassword } from "./password";
 
-function getResend() {
-  return new Resend(process.env.RESEND_API_KEY);
+class WaitingForAcceptanceError extends CredentialsSignin {
+  code = "waiting_acceptance";
+}
+
+class InvalidPasswordError extends CredentialsSignin {
+  code = "invalid_password";
 }
 
 export const fullAuthConfig: NextAuthConfig = {
   ...authConfig,
   providers: [
-    Email({
-      server: {
-        host: "smtp.resend.com",
-        port: 465,
-        secure: true,
-        auth: {
-          user: "resend",
-          pass: process.env.RESEND_API_KEY ?? "",
-        },
+    Credentials({
+      credentials: {
+        email: { label: "E-post", type: "email" },
+        password: { label: "Passord", type: "password" },
       },
-      from: process.env.EMAIL_FROM,
-      async sendVerificationRequest({ identifier, url }) {
-        if (isDevMagicLinkMode()) {
-          setDevMagicLink(identifier, url);
-          console.info(
-            `\n[auth] Magic link for ${identifier} (dev only, not sent via email):\n${url}\n`,
-          );
-          return;
+      async authorize(credentials) {
+        const email =
+          typeof credentials.email === "string"
+            ? credentials.email.trim().toLowerCase()
+            : "";
+        const password =
+          typeof credentials.password === "string"
+            ? credentials.password
+            : "";
+
+        if (!email || password.length < 6) {
+          throw new InvalidPasswordError();
         }
 
-        const { error } = await getResend().emails.send({
-          from:
-            process.env.EMAIL_FROM ??
-            "IT-Gullruten <onboarding@resend.dev>",
-          to: identifier,
-          subject: "Logg inn på IT-Gullruten",
-          html: `
-            <div style="font-family: Montserrat, sans-serif; background: #1C1C1C; color: #FFFFFF; padding: 32px;">
-              <h1 style="color: #C9A84C; font-weight: 300;">IT-Gullruten</h1>
-              <p>Klikk lenken under for å logge inn på Drømtorp Awards-stemmesystemet.</p>
-              <a href="${url}" style="display: inline-block; background: #C9A84C; color: #1C1C1C; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; margin-top: 16px;">
-                Logg inn
-              </a>
-              <p style="color: #E8D5A3; font-size: 12px; margin-top: 24px;">Hvis du ikke ba om denne e-posten, kan du ignorere den.</p>
-            </div>
-          `,
-        });
-        if (error) {
-          throw new Error(`Kunne ikke sende e-post: ${error.message}`);
+        const dbUser = await findUserByEmail(email);
+        if (!dbUser || dbUser.status !== "approved") {
+          throw new WaitingForAcceptanceError();
         }
+
+        if (dbUser.password_hash) {
+          const isValidPassword = await verifyPassword(
+            password,
+            dbUser.password_hash,
+          );
+          if (!isValidPassword) throw new InvalidPasswordError();
+        } else {
+          const passwordHash = await hashPassword(password);
+          await setUserPasswordHash(dbUser.id, passwordHash);
+        }
+
+        return {
+          id: dbUser.id,
+          name: dbUser.name,
+          email: dbUser.email,
+          role: dbUser.role,
+          status: dbUser.status,
+        };
       },
     }),
   ],
   callbacks: {
     ...authConfig.callbacks,
-    async signIn({ user }) {
-      if (!user.email) return false;
-
-      const approved = await isEmailApproved(user.email);
-      const status: UserStatus = approved ? "approved" : "pending";
-
-      const existing = await findUserByEmail(user.email);
-      const userId = existing?.id ?? user.id ?? crypto.randomUUID();
-      const dbUser = await upsertUserOnSignIn({
-        id: userId,
-        email: user.email,
-        name: user.name,
-        status,
-      });
-
-      Object.assign(user, {
-        id: dbUser.id,
-        role: dbUser.role,
-        status: dbUser.status,
-      });
-
-      return true;
-    },
     async jwt({ token, user, trigger }) {
       const email = token.email ?? user?.email;
       if (!email) return token;

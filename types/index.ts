@@ -5,6 +5,7 @@ export interface User {
   id: string;
   name: string | null;
   email: string;
+  password_hash?: string | null;
   role: UserRole;
   status: UserStatus;
   created_at: Date;

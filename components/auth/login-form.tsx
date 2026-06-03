@@ -11,6 +11,7 @@ interface LoginFormProps {
 
 export function LoginForm({ callbackUrl }: LoginFormProps) {
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -20,16 +21,21 @@ export function LoginForm({ callbackUrl }: LoginFormProps) {
     setError(null);
 
     try {
-      const result = await signIn("email", {
+      const result = await signIn("credentials", {
         email,
+        password,
         redirect: false,
         callbackUrl,
       });
 
       if (result?.error) {
-        setError("Kunne ikke sende innloggingslenke. Prøv igjen.");
+        setError(
+          result.code === "waiting_acceptance"
+            ? "you need to wait to be acsepted"
+            : "Feil e-post eller passord.",
+        );
       } else {
-        window.location.href = "/login?verify=1";
+        window.location.href = result?.url ?? callbackUrl;
       }
     } catch {
       setError("Noe gikk galt. Prøv igjen.");
@@ -50,13 +56,24 @@ export function LoginForm({ callbackUrl }: LoginFormProps) {
         required
         autoComplete="email"
       />
+      <Input
+        label="Passord"
+        type="password"
+        name="password"
+        placeholder="Skriv passord"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        required
+        minLength={6}
+        autoComplete="current-password"
+      />
       {error && <p className="text-xs text-red-400">{error}</p>}
       <Button type="submit" isLoading={isLoading} className="w-full">
-        Send innloggingslenke
+        Logg inn
       </Button>
       <p className="text-center text-xs font-light italic text-gold-light">
-        Kun godkjente e-postadresser kan stemme. Andre får tilgang til
-        resultater etter innlogging.
+        Kun godkjente brukere kan logge inn. Første innlogging lagrer passordet
+        ditt.
       </p>
     </form>
   );

@@ -10,19 +10,12 @@ CREATE TABLE IF NOT EXISTS users (
   id TEXT PRIMARY KEY,
   name TEXT,
   email TEXT UNIQUE NOT NULL,
+  password_hash TEXT,
   "emailVerified" TIMESTAMPTZ,
   image TEXT,
   role TEXT NOT NULL DEFAULT 'user',
   status TEXT NOT NULL DEFAULT 'pending',
   created_at TIMESTAMPTZ DEFAULT NOW()
-);
-
--- Auth.js magic link tokens (required for email provider)
-CREATE TABLE IF NOT EXISTS verification_token (
-  identifier TEXT NOT NULL,
-  expires TIMESTAMPTZ NOT NULL,
-  token TEXT NOT NULL,
-  PRIMARY KEY (identifier, token)
 );
 
 CREATE TABLE IF NOT EXISTS categories (
