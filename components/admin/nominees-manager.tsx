@@ -80,7 +80,7 @@ export function NomineesManager({
           </select>
         </div>
         <div className="flex flex-col gap-1.5">
-          <label className="text-sm font-medium text-gold-light">Bruker (valgfritt - for å forhindre selvomår)</label>
+          <label className="text-sm font-medium text-gold-light">Bruker (valgfritt - for å forhindre å stemme på seg selv)</label>
           <select
             value={userId}
             onChange={(e) => setUserId(e.target.value)}
