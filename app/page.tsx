@@ -28,11 +28,12 @@ export default async function HomePage() {
               Drømtorp videregående skole
             </p>
             <h1 className="mt-3 font-[family-name:var(--font-display)] text-5xl font-medium leading-[0.98] text-gold md:text-7xl lg:text-8xl">
-              Årets nominerte fortjener en scene.
+              Drømtorp Awards 2026
             </h1>
             <p className="mt-5 max-w-xl text-lg leading-relaxed text-gold-light md:text-xl">
-              En ryddigere startside for Drømtorp Awards, med samme mørke og
-              gylne uttrykk, større leseflater og rask vei videre til stemming.
+              Drømtorp Awards er en konkurranse for VG1-elever innen Medie og IT. 
+              Elevene skal lage et kreativt prosjekt basert på ulike temaer og vise frem sine ferdigheter innen 
+              digitale medier og teknologi.
             </p>
             <Link
               href={isApproved ? "/vote" : "/login"}
