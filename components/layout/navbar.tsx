@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { auth } from "@/auth";
 import { signOut } from "@/auth";
-import { isProducerOrAdmin } from "@/lib/auth/permissions";
+import { isProducerOrAdmin, canVote } from "@/lib/auth/permissions";
 
 export async function Navbar() {
   const session = await auth();
@@ -21,7 +21,7 @@ export async function Navbar() {
         <div className="flex items-center gap-6 text-sm">
           {user?.email ? (
             <>
-              {user.status === "approved" && (
+              {canVote(session) && (
                 <Link
                   href="/vote"
                   className="text-gold-light transition-all duration-200 hover:text-gold"

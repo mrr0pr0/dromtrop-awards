@@ -15,7 +15,8 @@ export function isApproved(session: Session | null): boolean {
 }
 
 export function canVote(session: Session | null): boolean {
-  return !!session?.user && isApproved(session);
+  if (!session?.user) return false;
+  return isApproved(session) || isAdmin(session);
 }
 
 export function hasRole(
