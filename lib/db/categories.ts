@@ -1,8 +1,7 @@
-import { getSql } from "./client";
+import { sql } from "./client";
 import type { Category } from "@/types";
 
 export async function listCategories(activeOnly = false): Promise<Category[]> {
-  const sql = getSql();
   const rows = activeOnly
     ? await sql`
         SELECT id, name, description, is_active, created_at
@@ -16,7 +15,6 @@ export async function listCategories(activeOnly = false): Promise<Category[]> {
 }
 
 export async function getCategoryById(id: number): Promise<Category | null> {
-  const sql = getSql();
   const rows = await sql`
     SELECT id, name, description, is_active, created_at
     FROM categories WHERE id = ${id} LIMIT 1
@@ -29,7 +27,6 @@ export async function createCategory(data: {
   description?: string | null;
   is_active?: boolean;
 }): Promise<Category> {
-  const sql = getSql();
   const rows = await sql`
     INSERT INTO categories (name, description, is_active)
     VALUES (${data.name}, ${data.description ?? null}, ${data.is_active ?? true})
@@ -46,15 +43,13 @@ export async function updateCategory(
     is_active?: boolean;
   },
 ): Promise<Category | null> {
-  const sql = getSql();
-  const existing = await getCategoryById(id);
-  if (!existing) return null;
-
   const rows = await sql`
     UPDATE categories SET
-      name = ${data.name ?? existing.name},
-      description = ${data.description !== undefined ? data.description : existing.description},
-      is_active = ${data.is_active ?? existing.is_active}
+      name        = COALESCE(${data.name ?? null}, name),
+      description = CASE WHEN ${data.description !== undefined}::boolean
+                         THEN ${data.description ?? null}
+                         ELSE description END,
+      is_active   = COALESCE(${data.is_active ?? null}, is_active)
     WHERE id = ${id}
     RETURNING id, name, description, is_active, created_at
   `;
@@ -62,12 +57,10 @@ export async function updateCategory(
 }
 
 export async function deleteCategory(id: number): Promise<void> {
-  const sql = getSql();
   await sql`DELETE FROM categories WHERE id = ${id}`;
 }
 
 export async function countActiveCategories(): Promise<number> {
-  const sql = getSql();
   const rows = await sql`
     SELECT COUNT(*)::int AS count FROM categories WHERE is_active = true
   `;

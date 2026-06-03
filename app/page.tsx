@@ -6,7 +6,8 @@ import { listCategories } from "@/lib/db/categories";
 import { countNomineesByCategory } from "@/lib/db/nominees";
 import { categorySlug } from "@/lib/voting/category-layout";
 
-export const dynamic = "force-dynamic";
+// Regenerate at most every 30 seconds instead of hitting the DB on every request
+export const revalidate = 30;
 
 export default async function HomePage() {
   const session = await auth();
