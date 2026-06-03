@@ -15,6 +15,30 @@ interface NomineesManagerProps {
   users: User[];
 }
 
+// Category name to optional fields mapping (case-insensitive)
+const CATEGORY_FIELDS_MAP: Record<string, string[]> = {
+  "beste medieproduksjon": ["description"],
+  "beste medieprudukt": ["description"],
+  "beste it-produkt": ["description", "site_url"],
+  "beste app": ["description", "site_url"],
+  "beste konsept": ["description"],
+  "beste kortfilm": ["description", "video_url"],
+  "mest originale idé": ["description", "what_we_made"],
+  "beste interaktiv": ["description", "site_url"],
+  "beste animasjon": [],
+  "beste historiefortelling": ["description"],
+};
+
+function getVisibleFields(categoryName: string): string[] {
+  const normalized = categoryName.trim().toLowerCase();
+  return CATEGORY_FIELDS_MAP[normalized] || [];
+}
+
+function getCategoryName(categoryId: string, categories: Category[]): string {
+  const category = categories.find((c) => c.id.toString() === categoryId);
+  return category?.name || "";
+}
+
 export function NomineesManager({
   nominees,
   categories,
@@ -27,7 +51,13 @@ export function NomineesManager({
   );
   const [userId, setUserId] = useState("");
   const [imageUrl, setImageUrl] = useState("");
+  const [description, setDescription] = useState("");
+  const [siteUrl, setSiteUrl] = useState("");
+  const [videoUrl, setVideoUrl] = useState("");
+  const [whatWeMade, setWhatWeMade] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const visibleFields = getVisibleFields(getCategoryName(categoryId, categories));
 
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault();
@@ -40,11 +70,19 @@ export function NomineesManager({
         category_id: Number(categoryId),
         user_id: userId || null,
         image_url: imageUrl || null,
+        description: description || null,
+        site_url: siteUrl || null,
+        video_url: videoUrl || null,
+        what_we_made: whatWeMade || null,
       }),
     });
     setName("");
     setUserId("");
     setImageUrl("");
+    setDescription("");
+    setSiteUrl("");
+    setVideoUrl("");
+    setWhatWeMade("");
     setLoading(false);
     router.refresh();
   }
@@ -101,6 +139,47 @@ export function NomineesManager({
           placeholder="https://res.cloudinary.com/..."
           className="sm:col-span-2"
         />
+
+        {visibleFields.includes("description") && (
+          <textarea
+            placeholder="Beskrivelse av oppføringen"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            className="rounded-lg border border-gold/30 bg-charcoal px-4 py-3 text-sm text-white placeholder-gold-light/50 sm:col-span-2"
+            rows={3}
+          />
+        )}
+
+        {visibleFields.includes("site_url") && (
+          <Input
+            label="Nettside-URL"
+            value={siteUrl}
+            onChange={(e) => setSiteUrl(e.target.value)}
+            placeholder="https://example.com"
+            className="sm:col-span-2"
+          />
+        )}
+
+        {visibleFields.includes("video_url") && (
+          <Input
+            label="Video-URL (SharePoint embed)"
+            value={videoUrl}
+            onChange={(e) => setVideoUrl(e.target.value)}
+            placeholder="https://..."
+            className="sm:col-span-2"
+          />
+        )}
+
+        {visibleFields.includes("what_we_made") && (
+          <textarea
+            placeholder="Hva vi lagde (valgfritt)"
+            value={whatWeMade}
+            onChange={(e) => setWhatWeMade(e.target.value)}
+            className="rounded-lg border border-gold/30 bg-charcoal px-4 py-3 text-sm text-white placeholder-gold-light/50 sm:col-span-2"
+            rows={3}
+          />
+        )}
+
         <Button type="submit" isLoading={loading}>
           Legg til nominert
         </Button>

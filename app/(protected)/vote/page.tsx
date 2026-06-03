@@ -4,7 +4,7 @@ import { auth } from "@/auth";
 import { listCategories } from "@/lib/db/categories";
 import { listNomineesByCategory } from "@/lib/db/nominees";
 import { getUserVotes } from "@/lib/db/votes";
-import { CategoryList } from "@/components/voting/category-list";
+import { CategoryPicker } from "@/components/voting/category-picker";
 
 export default async function VotePage() {
   const session = await auth();
@@ -16,6 +16,12 @@ export default async function VotePage() {
       nominees: await listNomineesByCategory(category.id),
     })),
   );
+
+  // Transform data structure for CategoryPicker
+  const nominees: Record<number, typeof categoriesWithNominees[0]["nominees"]> = {};
+  categoriesWithNominees.forEach(({ category, nominees: categoryNominees }) => {
+    nominees[category.id] = categoryNominees;
+  });
 
   const userVotes = session?.user?.id
     ? await getUserVotes(session.user.id)
@@ -30,8 +36,9 @@ export default async function VotePage() {
         Du kan stemme én gang per kategori. Velg din favoritt nedenfor.
       </p>
       <div className="mt-8">
-        <CategoryList
-          categories={categoriesWithNominees}
+        <CategoryPicker
+          categories={categories}
+          nominees={nominees}
           userVotes={userVotes}
           currentUserId={session?.user?.id}
         />
