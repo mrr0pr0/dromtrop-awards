@@ -8,7 +8,7 @@ export default function ShellLayout({
 }) {
   return (
     <>
-      <Navbar activePath="admin" />
+      <Navbar />
       <main className="mx-auto min-h-[calc(100vh-8rem)] w-full max-w-6xl flex-1 px-4 py-8">
         {children}
       </main>
