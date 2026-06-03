@@ -1,4 +1,4 @@
-import { VoteNavbar } from "@/components/layout/vote-navbar";
+import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 
 export default function VoteLayout({
@@ -8,7 +8,7 @@ export default function VoteLayout({
 }) {
   return (
     <div className="min-h-screen bg-black">
-      <VoteNavbar activePath="vote" />
+      <Navbar activePath="vote" />
       <main className="mx-auto w-full max-w-[1180px] flex-1 px-3 py-7 sm:px-4 sm:py-10 md:py-14">
         {children}
       </main>
