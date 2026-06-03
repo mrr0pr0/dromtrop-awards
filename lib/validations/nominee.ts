@@ -8,6 +8,22 @@ export const nomineeSchema = z.object({
     .union([z.string().url(), z.literal(""), z.null()])
     .optional()
     .transform((v) => (v === "" ? null : v ?? null)),
+  description: z
+    .union([z.string(), z.literal(""), z.null()])
+    .optional()
+    .transform((v) => (v === "" ? null : v ?? null)),
+  site_url: z
+    .union([z.string().url(), z.literal(""), z.null()])
+    .optional()
+    .transform((v) => (v === "" ? null : v ?? null)),
+  video_url: z
+    .union([z.string().url(), z.literal(""), z.null()])
+    .optional()
+    .transform((v) => (v === "" ? null : v ?? null)),
+  what_we_made: z
+    .union([z.string(), z.literal(""), z.null()])
+    .optional()
+    .transform((v) => (v === "" ? null : v ?? null)),
 });
 
 export const nomineeUpdateSchema = nomineeSchema.partial().extend({

@@ -31,6 +31,10 @@ export interface Nominee {
   category_id: number;
   user_id: string | null;
   image_url: string | null;
+  description?: string | null;
+  site_url?: string | null;
+  video_url?: string | null;
+  what_we_made?: string | null;
   created_at: Date;
 }
 

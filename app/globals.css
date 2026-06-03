@@ -8,6 +8,7 @@
   --color-charcoal: #2d2d2d;
   --color-parchment: #faf8f4;
   --color-white: #ffffff;
+  --color-success: #2f7d4e;
 }
 
 @theme inline {
@@ -18,8 +19,26 @@
   --color-charcoal: var(--color-charcoal);
   --color-parchment: var(--color-parchment);
   --color-white: var(--color-white);
+  --color-success: var(--color-success);
   --font-display: var(--font-display);
   --font-body: var(--font-body);
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .motion-safe\:animate-\[rise_520ms_ease_both\] {
+    animation: none !important;
+  }
 }
 
 body {

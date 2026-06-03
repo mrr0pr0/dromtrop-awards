@@ -7,7 +7,7 @@ INSERT INTO categories (name, description, is_active) VALUES
   ('Beste konsept', 'Årets beste konsept', true),
   ('Beste kortfilm', 'Årets beste kortfilm', true),
   ('Mest originale idé', 'Mest originale idé', true),
-  ('Beste spill', 'Årets beste spill', true),
+  ('Beste Interaktiv', 'Årets beste interaktiv', true),
   ('Beste animasjon', 'Årets beste animasjon', true),
   ('Beste historiefortelling', 'Årets beste historiefortelling', true)
 ;

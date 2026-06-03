@@ -32,6 +32,10 @@ CREATE TABLE IF NOT EXISTS nominees (
   category_id INTEGER NOT NULL REFERENCES categories(id) ON DELETE CASCADE,
   user_id TEXT REFERENCES users(id) ON DELETE CASCADE,
   image_url TEXT,
+  description TEXT,
+  site_url TEXT,
+  video_url TEXT,
+  what_we_made TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
