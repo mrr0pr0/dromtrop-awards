@@ -72,7 +72,7 @@ The 10 official IT-Gullruten 2026 categories:
 5. Beste konsept
 6. Beste kortfilm
 7. Mest originale idé
-8. Beste spill
+8. Beste Interaktiv
 9. Beste animasjon
 10. Beste historiefortelling
 

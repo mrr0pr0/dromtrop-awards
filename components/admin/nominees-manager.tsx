@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import type { Category, Nominee, User } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { getVisibleNomineeFields } from "@/lib/voting/category-layout";
 import { DataTable } from "./data-table";
 
 type NomineeRow = Nominee & { category_name: string };
@@ -13,6 +14,11 @@ interface NomineesManagerProps {
   nominees: NomineeRow[];
   categories: Category[];
   users: User[];
+}
+
+function getCategoryName(categoryId: string, categories: Category[]): string {
+  const category = categories.find((c) => c.id.toString() === categoryId);
+  return category?.name || "";
 }
 
 export function NomineesManager({
@@ -27,7 +33,15 @@ export function NomineesManager({
   );
   const [userId, setUserId] = useState("");
   const [imageUrl, setImageUrl] = useState("");
+  const [description, setDescription] = useState("");
+  const [siteUrl, setSiteUrl] = useState("");
+  const [videoUrl, setVideoUrl] = useState("");
+  const [whatWeMade, setWhatWeMade] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const visibleFields = getVisibleNomineeFields(
+    getCategoryName(categoryId, categories),
+  );
 
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault();
@@ -40,11 +54,19 @@ export function NomineesManager({
         category_id: Number(categoryId),
         user_id: userId || null,
         image_url: imageUrl || null,
+        description: description || null,
+        site_url: siteUrl || null,
+        video_url: videoUrl || null,
+        what_we_made: whatWeMade || null,
       }),
     });
     setName("");
     setUserId("");
     setImageUrl("");
+    setDescription("");
+    setSiteUrl("");
+    setVideoUrl("");
+    setWhatWeMade("");
     setLoading(false);
     router.refresh();
   }
@@ -101,6 +123,47 @@ export function NomineesManager({
           placeholder="https://res.cloudinary.com/..."
           className="sm:col-span-2"
         />
+
+        {visibleFields.includes("description") && (
+          <textarea
+            placeholder="Beskrivelse av oppføringen"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            className="rounded-lg border border-gold/30 bg-charcoal px-4 py-3 text-sm text-white placeholder-gold-light/50 sm:col-span-2"
+            rows={3}
+          />
+        )}
+
+        {visibleFields.includes("site_url") && (
+          <Input
+            label="Nettside-URL"
+            value={siteUrl}
+            onChange={(e) => setSiteUrl(e.target.value)}
+            placeholder="https://example.com"
+            className="sm:col-span-2"
+          />
+        )}
+
+        {visibleFields.includes("video_url") && (
+          <Input
+            label="Video-URL (SharePoint embed)"
+            value={videoUrl}
+            onChange={(e) => setVideoUrl(e.target.value)}
+            placeholder="https://..."
+            className="sm:col-span-2"
+          />
+        )}
+
+        {visibleFields.includes("what_we_made") && (
+          <textarea
+            placeholder="Hva vi lagde (valgfritt)"
+            value={whatWeMade}
+            onChange={(e) => setWhatWeMade(e.target.value)}
+            className="rounded-lg border border-gold/30 bg-charcoal px-4 py-3 text-sm text-white placeholder-gold-light/50 sm:col-span-2"
+            rows={3}
+          />
+        )}
+
         <Button type="submit" isLoading={loading}>
           Legg til nominert
         </Button>
