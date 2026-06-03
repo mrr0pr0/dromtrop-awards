@@ -1,36 +1,80 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# IT-Gullruten – Drømtorp Awards
 
-## Getting Started
+Offisiell publikumsstemme-plattform for Drømtorp Awards ved Drømtorp videregående skole.
 
-First, run the development server:
+## Tech stack
+
+- Next.js 16 (App Router) + TypeScript
+- Neon PostgreSQL (`@neondatabase/serverless`)
+- NextAuth.js v5 (e-post magic link via Resend)
+- Tailwind CSS v4
+
+## Kom i gang
+
+### 1. Installer avhengigheter
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. Miljøvariabler
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Kopier `.env.example` til `.env` og fyll inn:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Variabel | Beskrivelse |
+|----------|-------------|
+| `DATABASE_URL` | Neon connection string |
+| `AUTH_SECRET` | `openssl rand -base64 32` |
+| `AUTH_URL` | `http://localhost:3000` (produksjon: din domene-URL) |
+| `RESEND_API_KEY` | Fra [Resend](https://resend.com) |
+| `EMAIL_FROM` | Verifisert avsender hos Resend |
+| `BOOTSTRAP_ADMIN_EMAIL` | (valgfritt) Første innlogging med denne e-posten får `admin`-rolle |
 
-## Learn More
+### 3. Database
 
-To learn more about Next.js, take a look at the following resources:
+Kjør schema og seed mot tom Neon-database:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+pnpm db:push
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Eller lim inn `schema.sql` og `scripts/seed.sql` manuelt i Neon SQL Editor.
 
-## Deploy on Vercel
+Legg godkjente stemmere i `approved_emails`:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```sql
+INSERT INTO approved_emails (email) VALUES ('elev@skole.no');
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### 4. Start utviklingsserver
+
+```bash
+pnpm dev
+```
+
+Åpne [http://localhost:3000](http://localhost:3000).
+
+## Ruter
+
+| Rute | Tilgang |
+|------|---------|
+| `/login` | Offentlig |
+| `/vote` | Godkjente brukere |
+| `/results` | Innloggede |
+| `/admin/*` | Produsent / admin |
+| `/admin/users/roles` | Kun admin |
+
+## Første admin
+
+1. Sett `BOOTSTRAP_ADMIN_EMAIL` i `.env` til din e-post, **eller**
+2. Etter første innlogging: `UPDATE users SET role = 'admin' WHERE email = 'din@epost.no';`
+
+## Produksjon (Vercel)
+
+- Legg inn alle miljøvariabler i Vercel-prosjektet
+- Sett `AUTH_URL` til produksjons-URL
+- Verifiser domene hos Resend for `EMAIL_FROM`
+
+## Lisens
+
+Privat skoleprosjekt – Drømtorp videregående skole.

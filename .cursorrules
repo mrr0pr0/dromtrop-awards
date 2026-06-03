@@ -67,44 +67,25 @@ Import from Google Fonts. Never substitute these fonts.
 ## File & Folder Structure
 
 ```
-src/
-  app/
-    (auth)/
-      login/
-    (protected)/
-      vote/
-      results/
-      admin/
-        dashboard/
-        categories/
-        nominees/
-        users/
-    api/
-      auth/
-      votes/
-      categories/
-      nominees/
-      users/
-  components/
-    ui/           # Reusable primitives (Button, Card, Badge, etc.)
-    layout/       # Navbar, Sidebar, Footer
-    voting/       # VoteCard, CategoryList, NomineeCard
-    admin/        # DataTable, StatCard, UserRow
-    results/      # Leaderboard, RankCard
-  lib/
-    db/           # Neon DB client and query helpers
-    auth/         # NextAuth config
-    validations/  # Zod schemas
-    utils/        # Shared utilities
-  types/
-    index.ts      # All shared TypeScript types
+app/
+  (auth)/login/
+  (protected)/vote/ results/ admin/...
+  api/auth/ votes/ categories/ nominees/ users/
+components/
+  ui/ layout/ voting/ admin/ results/
+lib/
+  db/ auth/ validations/ utils/
+types/
+  index.ts
+auth.ts
+middleware.ts
 ```
 
 ---
 
 ## Database – Neon DB Rules
 - Use `@neondatabase/serverless` with the `neon()` tagged template literal
-- All queries go in `src/lib/db/`
+- All queries go in `lib/db/`
 - Schema is raw SQL (no ORM) – keep a `schema.sql` at the root
 - Use parameterized queries ALWAYS – never string interpolation in SQL
 - Table names: `users`, `categories`, `nominees`, `votes`, `approved_emails`
@@ -125,7 +106,7 @@ src/
 - Use NextAuth.js v5 (Auth.js) – Email magic link or credentials
 - Session strategy: JWT
 - On sign-in: check `approved_emails` table → if found, auto-approve; else mark as `pending`
-- Protect routes via middleware (`src/middleware.ts`)
+- Protect routes via middleware (`middleware.ts`)
 - Role checks: always server-side via `auth()` or session – never trust client-side role
 
 ---

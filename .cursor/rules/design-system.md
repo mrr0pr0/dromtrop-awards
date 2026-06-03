@@ -32,7 +32,7 @@ colors: {
 
 ## Google Fonts Import
 ```ts
-// src/app/layout.tsx
+// app/layout.tsx
 import { Cormorant_Garamond, Montserrat } from "next/font/google";
 
 const cormorant = Cormorant_Garamond({

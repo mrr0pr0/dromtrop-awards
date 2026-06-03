@@ -1,0 +1,71 @@
+import NextAuth from "next-auth";
+import { NextResponse } from "next/server";
+import { authConfig } from "@/lib/auth/auth.config";
+
+const { auth } = NextAuth(authConfig);
+
+export default auth((req) => {
+  const { pathname } = req.nextUrl;
+  const session = req.auth;
+  const isLoggedIn = !!session;
+
+  const role = session?.user?.role;
+  const status = session?.user?.status;
+
+  const isProtected =
+    pathname.startsWith("/vote") ||
+    pathname.startsWith("/results") ||
+    pathname.startsWith("/admin");
+
+  if (!isProtected) {
+    if (pathname === "/login" && isLoggedIn) {
+      if (status === "approved") {
+        return NextResponse.redirect(new URL("/vote", req.url));
+      }
+      if (role === "admin" || role === "producer") {
+        return NextResponse.redirect(new URL("/admin/dashboard", req.url));
+      }
+      return NextResponse.redirect(new URL("/results", req.url));
+    }
+    return NextResponse.next();
+  }
+
+  if (!isLoggedIn) {
+    const loginUrl = new URL("/login", req.url);
+    loginUrl.searchParams.set("callbackUrl", pathname);
+    return NextResponse.redirect(loginUrl);
+  }
+
+  if (status === "rejected") {
+    return NextResponse.redirect(new URL("/login?error=rejected", req.url));
+  }
+
+  if (pathname.startsWith("/vote") && status !== "approved") {
+    return NextResponse.redirect(
+      new URL("/login?error=pending", req.url),
+    );
+  }
+
+  if (pathname.startsWith("/admin")) {
+    if (role !== "admin" && role !== "producer") {
+      return NextResponse.redirect(new URL("/results", req.url));
+    }
+    if (
+      pathname.startsWith("/admin/users/roles") &&
+      role !== "admin"
+    ) {
+      return NextResponse.redirect(new URL("/admin/users", req.url));
+    }
+  }
+
+  return NextResponse.next();
+});
+
+export const config = {
+  matcher: [
+    "/vote/:path*",
+    "/results/:path*",
+    "/admin/:path*",
+    "/login",
+  ],
+};

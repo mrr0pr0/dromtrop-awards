@@ -1,7 +1,7 @@
 # Auth Rules – NextAuth.js v5
 
 ## Setup
-Use Auth.js v5 (`next-auth@beta`). Config lives at `src/lib/auth/config.ts` and `src/auth.ts`.
+Use Auth.js v5 (`next-auth@beta`). Config lives at `lib/auth/config.ts` and `auth.ts`.
 
 ## Session Strategy
 JWT sessions. Never database sessions (Neon is serverless, minimize connections).
@@ -13,7 +13,7 @@ JWT sessions. Never database sessions (Neon is serverless, minimize connections)
 4. If not found → create user with `status = 'pending'`
 5. Send magic link email
 
-## Middleware (src/middleware.ts)
+## Middleware (middleware.ts)
 Protect all routes under `/(protected)/`. Redirect unauthenticated users to `/login`.
 
 ## Role Check Pattern (Server Components)
@@ -42,7 +42,7 @@ export async function POST(req: Request) {
 }
 ```
 
-## Session Type Extension (src/types/next-auth.d.ts)
+## Session Type Extension (types/next-auth.d.ts)
 ```ts
 declare module "next-auth" {
   interface Session {

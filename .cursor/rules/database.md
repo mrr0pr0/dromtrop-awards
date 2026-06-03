@@ -18,16 +18,16 @@ const users = await sql(`SELECT * FROM users WHERE email = '${email}'`);
 ```
 
 ## Query File Location
-All database queries live in `src/lib/db/`. Name files by entity:
-- `src/lib/db/users.ts`
-- `src/lib/db/categories.ts`
-- `src/lib/db/nominees.ts`
-- `src/lib/db/votes.ts`
+All database queries live in `lib/db/`. Name files by entity:
+- `lib/db/users.ts`
+- `lib/db/categories.ts`
+- `lib/db/nominees.ts`
+- `lib/db/votes.ts`
 
 ## Connection
 Create the client once per request (Neon handles pooling):
 ```ts
-// src/lib/db/client.ts
+// lib/db/client.ts
 import { neon } from "@neondatabase/serverless";
 export const sql = neon(process.env.DATABASE_URL!);
 ```
