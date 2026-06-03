@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { auth } from "@/auth";
 import { signOut } from "@/auth";
@@ -20,9 +21,13 @@ export async function DetailNavbar({ activePath = "vote" }: DetailNavbarProps) {
         className="inline-flex min-w-0 flex-1 items-center gap-3 font-[family-name:var(--font-display)] text-xl font-bold text-white sm:text-2xl"
         aria-label="Drømtorp Awards hjem"
       >
-        <span className="grid h-[34px] w-[34px] shrink-0 place-items-center border border-gold text-sm font-extrabold text-gold">
-          DA
-        </span>
+        <Image
+          src="/favicon.ico"
+          alt="DA Logo"
+          width={34}
+          height={34}
+          className="shrink-0"
+        />
         <span className="truncate">Drømtorp Awards</span>
       </Link>
 
