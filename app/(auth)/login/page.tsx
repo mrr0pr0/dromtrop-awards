@@ -15,7 +15,10 @@ export default async function LoginPage({
 	const params = await searchParams;
 
 	const errorMessages: Record<string, string> = {
-		pending: 'you need to wait to be acsepted',
+		pending:
+			'Kontoen din venter på godkjenning. Prøv igjen senere.',
+		waiting_acceptance:
+			'Kontoen din venter på godkjenning. Prøv igjen senere.',
 		rejected:
 			'Kontoen din er avvist. Kontakt arrangør hvis du mener dette er feil.',
 		rejected_access: 'Du har ikke tilgang til denne siden.',

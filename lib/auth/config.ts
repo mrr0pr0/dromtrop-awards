@@ -12,6 +12,10 @@ class WaitingForAcceptanceError extends CredentialsSignin {
 	code = 'waiting_acceptance';
 }
 
+class RejectedAccountError extends CredentialsSignin {
+	code = 'rejected';
+}
+
 class InvalidPasswordError extends CredentialsSignin {
 	code = 'invalid_password';
 }
@@ -39,8 +43,11 @@ export const fullAuthConfig: NextAuthConfig = {
 				}
 
 				const dbUser = await findUserByEmail(email);
-				if (!dbUser || dbUser.status !== 'approved') {
+				if (!dbUser || dbUser.status === 'pending') {
 					throw new WaitingForAcceptanceError();
+				}
+				if (dbUser.status === 'rejected') {
+					throw new RejectedAccountError();
 				}
 
 				if (dbUser.password_hash) {

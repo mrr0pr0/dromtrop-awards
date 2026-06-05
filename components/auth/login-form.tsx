@@ -29,10 +29,15 @@ export function LoginForm({ callbackUrl }: LoginFormProps) {
 			});
 
 			if (result?.error) {
+				const errorMap: Record<string, string> = {
+					waiting_acceptance:
+						'Kontoen din venter på godkjenning. Prøv igjen senere.',
+					rejected:
+						'Kontoen din er avvist. Kontakt arrangør hvis du mener dette er feil.',
+				};
 				setError(
-					result.code === 'waiting_acceptance'
-						? 'you need to wait to be acsepted'
-						: 'Feil e-post eller passord.',
+					errorMap[result.code ?? ''] ??
+					'Feil e-post eller passord.',
 				);
 			} else {
 				window.location.href = result?.url ?? callbackUrl;

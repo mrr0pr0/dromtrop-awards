@@ -20,14 +20,14 @@ export default auth((req) => {
 
 	if (!isProtected) {
 		if (pathname === '/login' && isLoggedIn) {
-			if (status === 'approved') {
-				return NextResponse.redirect(
-					new URL('/vote', req.url),
-				);
-			}
 			if (role === 'admin' || role === 'producer') {
 				return NextResponse.redirect(
 					new URL('/admin/dashboard', req.url),
+				);
+			}
+			if (status === 'approved') {
+				return NextResponse.redirect(
+					new URL('/vote', req.url),
 				);
 			}
 			return NextResponse.redirect(
