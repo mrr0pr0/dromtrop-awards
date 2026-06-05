@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { signIn } from 'next-auth/react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -10,10 +11,22 @@ interface LoginFormProps {
 }
 
 export function LoginForm({ callbackUrl }: LoginFormProps) {
+	const router = useRouter();
 	const [email, setEmail] = useState('');
 	const [password, setPassword] = useState('');
 	const [isLoading, setIsLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
+
+	// Strip any host from callbackUrl so we never redirect off-domain
+	function safeRedirectPath(url: string): string {
+		try {
+			const parsed = new URL(url);
+			return parsed.pathname + parsed.search;
+		} catch {
+			// Already a relative path
+			return url.startsWith('/') ? url : '/vote';
+		}
+	}
 
 	async function handleSubmit(e: React.FormEvent) {
 		e.preventDefault();
@@ -25,7 +38,6 @@ export function LoginForm({ callbackUrl }: LoginFormProps) {
 				email,
 				password,
 				redirect: false,
-				callbackUrl,
 			});
 
 			if (result?.error) {
@@ -40,7 +52,8 @@ export function LoginForm({ callbackUrl }: LoginFormProps) {
 					'Feil e-post eller passord.',
 				);
 			} else {
-				window.location.href = result?.url ?? callbackUrl;
+				router.push(safeRedirectPath(callbackUrl));
+				router.refresh();
 			}
 		} catch {
 			setError('Noe gikk galt. Prøv igjen.');
