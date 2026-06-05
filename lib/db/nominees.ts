@@ -1,6 +1,27 @@
 import { sql } from './client';
 import type { Nominee } from '@/types';
 
+/**
+ * Fetches all approved nominees for multiple categories in one query.
+ * Returns a map of category_id → Nominee[].
+ */
+export async function listApprovedNomineesGrouped(
+	categoryIds: number[],
+): Promise<Record<number, Nominee[]>> {
+	if (categoryIds.length === 0) return {};
+	const rows = await sql`
+    SELECT id, name, category_id, user_id, status, image_url, description, site_url, video_url, what_we_made, created_at
+    FROM nominees
+    WHERE category_id = ANY(${categoryIds}::int[]) AND status = 'approved'
+    ORDER BY name ASC
+  `;
+	const grouped: Record<number, Nominee[]> = {};
+	for (const row of rows as Nominee[]) {
+		(grouped[row.category_id] ??= []).push(row);
+	}
+	return grouped;
+}
+
 export async function listNomineesByCategory(
 	categoryId: number,
 ): Promise<Nominee[]> {
