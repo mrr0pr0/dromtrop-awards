@@ -3,6 +3,10 @@ export type UserStatus =
 	| 'pending'
 	| 'approved'
 	| 'rejected';
+export type NomineeStatus =
+	| 'pending'
+	| 'approved'
+	| 'rejected';
 
 export interface User {
 	id: string;
@@ -33,6 +37,7 @@ export interface Nominee {
 	name: string;
 	category_id: number;
 	user_id: string | null;
+	status: NomineeStatus;
 	image_url: string | null;
 	description?: string | null;
 	site_url?: string | null;

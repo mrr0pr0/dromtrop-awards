@@ -31,6 +31,7 @@ CREATE TABLE IF NOT EXISTS nominees (
   name TEXT NOT NULL,
   category_id INTEGER NOT NULL REFERENCES categories(id) ON DELETE CASCADE,
   user_id TEXT REFERENCES users(id) ON DELETE CASCADE,
+  status TEXT NOT NULL DEFAULT 'approved',
   image_url TEXT,
   description TEXT,
   site_url TEXT,

@@ -50,11 +50,21 @@ async function main() {
 		join(root, 'scripts', 'rename-beste-spill.sql'),
 		'utf-8',
 	);
+	const nomineeStatus = readFileSync(
+		join(
+			root,
+			'scripts',
+			'add-nominee-status-migration.sql',
+		),
+		'utf-8',
+	);
 
 	console.log('Applying nominee fields migration...');
 	await pool.query(nomineeFields);
 	console.log('Renaming Beste spill → Beste Interaktiv...');
 	await pool.query(renameSpill);
+	console.log('Applying nominee status migration...');
+	await pool.query(nomineeStatus);
 	console.log('✓ Migrations complete!');
 
 	await pool.end();

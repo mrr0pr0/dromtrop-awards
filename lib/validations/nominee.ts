@@ -4,6 +4,9 @@ export const nomineeSchema = z.object({
 	name: z.string().min(1, 'Navn er påkrevd'),
 	category_id: z.coerce.number().int().positive(),
 	user_id: z.string().optional().nullable(),
+	status: z
+		.enum(['pending', 'approved', 'rejected'])
+		.optional(),
 	image_url: z
 		.union([z.string().url(), z.literal(''), z.null()])
 		.optional()

@@ -33,11 +33,10 @@ export function VoteDashboard({
 	const [filter, setFilter] = useState<FilterMode>('all');
 	const [activeSlug, setActiveSlug] = useState<
 		string | null
-	>(null);
-
-	useEffect(() => {
-		setLocalVotes(userVotes);
-	}, [userVotes]);
+	>(() => {
+		if (typeof window === 'undefined') return null;
+		return window.location.hash.replace(/^#/, '') || null;
+	});
 
 	useEffect(() => {
 		if (!toast) return;
@@ -46,9 +45,6 @@ export function VoteDashboard({
 	}, [toast]);
 
 	useEffect(() => {
-		const hash = window.location.hash.replace(/^#/, '');
-		if (hash) setActiveSlug(hash);
-
 		function onHashChange() {
 			const h = window.location.hash.replace(/^#/, '');
 			if (h) setActiveSlug(h);
@@ -144,7 +140,6 @@ export function VoteDashboard({
 
 	const visibleCategories = categories.filter(
 		(category) => {
-			const slug = categorySlug(category.name);
 			const list = nominees[category.id] ?? [];
 			const state = list.length > 0 ? 'open' : 'empty';
 			const searchBlob =

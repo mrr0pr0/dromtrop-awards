@@ -2,13 +2,24 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import type { Category, Nominee, User } from '@/types';
+import type {
+	Category,
+	Nominee,
+	NomineeStatus,
+	User,
+} from '@/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { getVisibleNomineeFields } from '@/lib/voting/category-layout';
 import { DataTable } from './data-table';
 
 type NomineeRow = Nominee & { category_name: string };
+
+const statusLabels: Record<NomineeStatus, string> = {
+	pending: 'Venter',
+	approved: 'Godkjent',
+	rejected: 'Avvist',
+};
 
 interface NomineesManagerProps {
 	nominees: NomineeRow[];
@@ -43,6 +54,9 @@ export function NomineesManager({
 	const [videoUrl, setVideoUrl] = useState('');
 	const [whatWeMade, setWhatWeMade] = useState('');
 	const [loading, setLoading] = useState(false);
+	const [statusLoading, setStatusLoading] = useState<
+		number | null
+	>(null);
 
 	const visibleFields = getVisibleNomineeFields(
 		getCategoryName(categoryId, categories),
@@ -73,6 +87,20 @@ export function NomineesManager({
 		setVideoUrl('');
 		setWhatWeMade('');
 		setLoading(false);
+		router.refresh();
+	}
+
+	async function handleStatus(
+		id: number,
+		status: NomineeStatus,
+	) {
+		setStatusLoading(id);
+		await fetch('/api/nominees', {
+			method: 'PATCH',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ id, status }),
+		});
+		setStatusLoading(null);
 		router.refresh();
 	}
 
@@ -201,16 +229,60 @@ export function NomineesManager({
 						render: (n) => n.category_name,
 					},
 					{
+						key: 'submitter',
+						header: 'Sendt inn av',
+						render: (n) => {
+							const user = users.find(
+								(u) => u.id === n.user_id,
+							);
+							return user?.name || user?.email || '-';
+						},
+					},
+					{
+						key: 'status',
+						header: 'Status',
+						render: (n) => (
+							<span className="rounded-full border border-gold/30 px-2.5 py-1 text-xs text-gold-light">
+								{statusLabels[n.status]}
+							</span>
+						),
+					},
+					{
 						key: 'actions',
 						header: 'Handlinger',
 						render: (n) => (
-							<Button
-								variant="outline"
-								className="px-3 py-1 text-xs"
-								onClick={() => handleDelete(n.id)}
-							>
-								Slett
-							</Button>
+							<div className="flex flex-wrap gap-2">
+								{n.status !== 'approved' && (
+									<Button
+										className="px-3 py-1 text-xs"
+										isLoading={statusLoading === n.id}
+										onClick={() =>
+											handleStatus(n.id, 'approved')
+										}
+									>
+										Godkjenn
+									</Button>
+								)}
+								{n.status !== 'rejected' && (
+									<Button
+										variant="outline"
+										className="px-3 py-1 text-xs"
+										isLoading={statusLoading === n.id}
+										onClick={() =>
+											handleStatus(n.id, 'rejected')
+										}
+									>
+										Avvis
+									</Button>
+								)}
+								<Button
+									variant="outline"
+									className="px-3 py-1 text-xs"
+									onClick={() => handleDelete(n.id)}
+								>
+									Slett
+								</Button>
+							</div>
 						),
 					},
 				]}

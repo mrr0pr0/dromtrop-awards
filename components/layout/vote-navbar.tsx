@@ -9,7 +9,7 @@ import {
 import { cn } from '@/lib/utils/cn';
 
 interface VoteNavbarProps {
-	activePath?: 'vote' | 'home' | 'results' | 'admin';
+	activePath?: 'vote' | 'home' | 'nominate' | 'results' | 'admin';
 }
 
 export async function VoteNavbar({
@@ -62,6 +62,19 @@ export async function VoteNavbar({
 						)}
 					>
 						Stem
+					</Link>
+				)}
+				{canVote(session) && (
+					<Link
+						href="/nominate"
+						className={cn(
+							'inline-flex min-h-10 shrink-0 items-center rounded-lg px-3 text-sm transition-colors',
+							activePath === 'nominate'
+								? 'bg-gold font-bold text-black'
+								: 'text-white/80 hover:bg-white/10 hover:text-white',
+						)}
+					>
+						Nominer
 					</Link>
 				)}
 				<Link

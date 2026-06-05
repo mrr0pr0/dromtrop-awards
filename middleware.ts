@@ -14,6 +14,7 @@ export default auth((req) => {
 
 	const isProtected =
 		pathname.startsWith('/vote') ||
+		pathname.startsWith('/nominate') ||
 		pathname.startsWith('/results') ||
 		pathname.startsWith('/admin');
 
@@ -49,7 +50,8 @@ export default auth((req) => {
 	}
 
 	if (
-		pathname.startsWith('/vote') &&
+		(pathname.startsWith('/vote') ||
+			pathname.startsWith('/nominate')) &&
 		status !== 'approved' &&
 		role !== 'admin' &&
 		role !== 'producer'
@@ -81,6 +83,7 @@ export default auth((req) => {
 export const config = {
 	matcher: [
 		'/vote/:path*',
+		'/nominate/:path*',
 		'/results/:path*',
 		'/admin/:path*',
 		'/login',

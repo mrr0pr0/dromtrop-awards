@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import type { Category, Nominee, Vote } from '@/types';
 import { NomineeDetailView } from './nominee-detail-view';
 
@@ -25,10 +25,6 @@ export function NomineeDetailClient({
 		null,
 	);
 	const [error, setError] = useState<string | null>(null);
-
-	useEffect(() => {
-		setLocalVotes(userVotes);
-	}, [userVotes]);
 
 	async function handleVote(
 		categoryId: number,

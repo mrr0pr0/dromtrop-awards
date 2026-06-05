@@ -5,8 +5,10 @@ export async function listNomineesByCategory(
 	categoryId: number,
 ): Promise<Nominee[]> {
 	const rows = await sql`
-    SELECT id, name, category_id, user_id, image_url, description, site_url, video_url, what_we_made, created_at
-    FROM nominees WHERE category_id = ${categoryId} ORDER BY name ASC
+    SELECT id, name, category_id, user_id, status, image_url, description, site_url, video_url, what_we_made, created_at
+    FROM nominees
+    WHERE category_id = ${categoryId} AND status = 'approved'
+    ORDER BY name ASC
   `;
 	return rows as Nominee[];
 }
@@ -15,10 +17,13 @@ export async function listAllNominees(): Promise<
 	(Nominee & { category_name: string })[]
 > {
 	const rows = await sql`
-    SELECT n.id, n.name, n.category_id, n.user_id, n.image_url, n.description, n.site_url, n.video_url, n.what_we_made, n.created_at, c.name AS category_name
+    SELECT n.id, n.name, n.category_id, n.user_id, n.status, n.image_url, n.description, n.site_url, n.video_url, n.what_we_made, n.created_at, c.name AS category_name
     FROM nominees n
     JOIN categories c ON c.id = n.category_id
-    ORDER BY c.id ASC, n.name ASC
+    ORDER BY
+      CASE n.status WHEN 'pending' THEN 0 WHEN 'approved' THEN 1 ELSE 2 END,
+      c.id ASC,
+      n.name ASC
   `;
 	return rows as (Nominee & { category_name: string })[];
 }
@@ -27,7 +32,7 @@ export async function getNomineeById(
 	id: number,
 ): Promise<Nominee | null> {
 	const rows = await sql`
-    SELECT id, name, category_id, user_id, image_url, description, site_url, video_url, what_we_made, created_at
+    SELECT id, name, category_id, user_id, status, image_url, description, site_url, video_url, what_we_made, created_at
     FROM nominees WHERE id = ${id} LIMIT 1
   `;
 	return (rows[0] as Nominee) ?? null;
@@ -37,6 +42,7 @@ export async function createNominee(data: {
 	name: string;
 	category_id: number;
 	user_id?: string | null;
+	status?: 'pending' | 'approved' | 'rejected';
 	image_url?: string | null;
 	description?: string | null;
 	site_url?: string | null;
@@ -44,9 +50,9 @@ export async function createNominee(data: {
 	what_we_made?: string | null;
 }): Promise<Nominee> {
 	const rows = await sql`
-    INSERT INTO nominees (name, category_id, user_id, image_url, description, site_url, video_url, what_we_made)
-    VALUES (${data.name}, ${data.category_id}, ${data.user_id ?? null}, ${data.image_url ?? null}, ${data.description ?? null}, ${data.site_url ?? null}, ${data.video_url ?? null}, ${data.what_we_made ?? null})
-    RETURNING id, name, category_id, user_id, image_url, description, site_url, video_url, what_we_made, created_at
+    INSERT INTO nominees (name, category_id, user_id, status, image_url, description, site_url, video_url, what_we_made)
+    VALUES (${data.name}, ${data.category_id}, ${data.user_id ?? null}, ${data.status ?? 'pending'}, ${data.image_url ?? null}, ${data.description ?? null}, ${data.site_url ?? null}, ${data.video_url ?? null}, ${data.what_we_made ?? null})
+    RETURNING id, name, category_id, user_id, status, image_url, description, site_url, video_url, what_we_made, created_at
   `;
 	return rows[0] as Nominee;
 }
@@ -57,6 +63,7 @@ export async function updateNominee(
 		name?: string;
 		category_id?: number;
 		user_id?: string | null;
+		status?: 'pending' | 'approved' | 'rejected';
 		image_url?: string | null;
 		description?: string | null;
 		site_url?: string | null;
@@ -70,6 +77,7 @@ export async function updateNominee(
     UPDATE nominees SET
       name        = COALESCE(${data.name ?? null},        name),
       category_id = COALESCE(${data.category_id ?? null}, category_id),
+      status      = COALESCE(${data.status ?? null},      status),
       user_id     = CASE WHEN ${data.user_id !== undefined}::boolean
                          THEN ${data.user_id ?? null}
                          ELSE user_id END,
@@ -89,7 +97,7 @@ export async function updateNominee(
                           THEN ${data.what_we_made ?? null}
                           ELSE what_we_made END
     WHERE id = ${id}
-    RETURNING id, name, category_id, user_id, image_url, description, site_url, video_url, what_we_made, created_at
+    RETURNING id, name, category_id, user_id, status, image_url, description, site_url, video_url, what_we_made, created_at
   `;
 	return (rows[0] as Nominee) ?? null;
 }
@@ -106,6 +114,7 @@ export async function countNomineesByCategory(): Promise<
 	const rows = await sql`
     SELECT category_id, COUNT(*)::int AS count
     FROM nominees
+    WHERE status = 'approved'
     GROUP BY category_id
   `;
 	const counts: Record<number, number> = {};

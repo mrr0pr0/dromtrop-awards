@@ -23,7 +23,7 @@ export default async function NomineeDetailPage({
 		notFound();
 
 	const nominee = await getNomineeById(nomineeId);
-	if (!nominee) notFound();
+	if (!nominee || nominee.status !== 'approved') notFound();
 
 	const category = await getCategoryById(
 		nominee.category_id,
