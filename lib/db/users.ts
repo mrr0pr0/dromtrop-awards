@@ -1,5 +1,38 @@
 import { sql } from './client';
 import type { User, UserRole, UserStatus } from '@/types';
+import { hashPassword } from '@/lib/auth/password';
+import { isEmailApproved } from './approved-emails';
+
+export async function createPendingUser(data: {
+	email: string;
+	name?: string | null;
+	password: string;
+}): Promise<User> {
+	const bootstrapAdmin =
+		process.env.BOOTSTRAP_ADMIN_EMAIL?.toLowerCase();
+	const role: UserRole =
+		bootstrapAdmin &&
+		data.email.toLowerCase() === bootstrapAdmin
+			? 'admin'
+			: 'user';
+	const approved = await isEmailApproved(data.email);
+	const status: UserStatus = approved ? 'approved' : 'pending';
+	const password_hash = await hashPassword(data.password);
+	const id = globalThis.crypto.randomUUID();
+	const rows = await sql`
+    INSERT INTO users (id, email, name, status, role, password_hash)
+    VALUES (${id}, ${data.email.toLowerCase()}, ${data.name ?? null}, ${status}, ${role}, ${password_hash})
+    ON CONFLICT (email) DO NOTHING
+    RETURNING id, name, email, role, status, created_at
+  `;
+	// ON CONFLICT means user already exists — just return them
+	if (rows.length === 0) {
+		const existing = await findUserByEmail(data.email);
+		if (!existing) throw new Error('Failed to create user');
+		return existing;
+	}
+	return rows[0] as User;
+}
 
 export async function findUserByEmail(
 	email: string,

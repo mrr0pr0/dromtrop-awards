@@ -4,6 +4,7 @@ import Credentials from 'next-auth/providers/credentials';
 import {
 	findUserByEmail,
 	setUserPasswordHash,
+	createPendingUser,
 } from '@/lib/db/users';
 import { authConfig } from './auth.config';
 import { hashPassword, verifyPassword } from './password';
@@ -27,6 +28,7 @@ export const fullAuthConfig: NextAuthConfig = {
 			credentials: {
 				email: { label: 'E-post', type: 'email' },
 				password: { label: 'Passord', type: 'password' },
+				name: { label: 'Navn', type: 'text' },
 			},
 			async authorize(credentials) {
 				const email =
@@ -37,13 +39,37 @@ export const fullAuthConfig: NextAuthConfig = {
 					typeof credentials.password === 'string'
 						? credentials.password
 						: '';
+				const name =
+					typeof credentials.name === 'string' &&
+					credentials.name.trim() !== '' &&
+					credentials.name.trim() !== 'undefined'
+						? credentials.name.trim()
+						: null;
 
 				if (!email || password.length < 6) {
 					throw new InvalidPasswordError();
 				}
 
-				const dbUser = await findUserByEmail(email);
-				if (!dbUser || dbUser.status === 'pending') {
+				let dbUser = await findUserByEmail(email);
+
+				// Unknown user — register them only once we have a name
+				if (!dbUser) {
+					if (name) {
+						const newUser = await createPendingUser({ email, name, password });
+						if (newUser.status === 'approved') {
+							return {
+								id: newUser.id,
+								name: newUser.name,
+								email: newUser.email,
+								role: newUser.role,
+								status: newUser.status,
+							};
+						}
+					}
+					throw new WaitingForAcceptanceError();
+				}
+
+				if (dbUser.status === 'pending') {
 					throw new WaitingForAcceptanceError();
 				}
 				if (dbUser.status === 'rejected') {
