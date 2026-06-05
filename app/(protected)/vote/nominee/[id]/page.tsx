@@ -25,18 +25,18 @@ export default async function NomineeDetailPage({
 	const nominee = await getNomineeById(nomineeId);
 	if (!nominee || nominee.status !== 'approved') notFound();
 
-	const category = await getCategoryById(
-		nominee.category_id,
-	);
+	const [category, session] = await Promise.all([
+		getCategoryById(nominee.category_id),
+		auth(),
+	]);
 	if (!category) notFound();
 
-	const session = await auth();
-	const categoryNominees = await listNomineesByCategory(
-		category.id,
-	);
-	const userVotes = session?.user?.id
-		? await getUserVotes(session.user.id)
-		: [];
+	const [categoryNominees, userVotes] = await Promise.all([
+		listNomineesByCategory(category.id),
+		session?.user?.id
+			? getUserVotes(session.user.id)
+			: Promise.resolve([]),
+	]);
 
 	return (
 		<NomineeDetailClient
