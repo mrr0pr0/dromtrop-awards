@@ -65,11 +65,11 @@ export async function getLeaderboardByCategory(
 	categoryId: number,
 ) {
 	const rows = await sql`
-    SELECT n.id, n.name, n.category_id, n.image_url, n.created_at,
+    SELECT n.id, n.name, n.category_id, n.user_id, n.status, n.image_url, n.description, n.site_url, n.video_url, n.what_we_made, n.created_at,
            COUNT(v.id)::int AS vote_count
     FROM nominees n
     LEFT JOIN votes v ON v.nominee_id = n.id
-    WHERE n.category_id = ${categoryId}
+    WHERE n.category_id = ${categoryId} AND n.status = 'approved'
     GROUP BY n.id
     ORDER BY vote_count DESC, n.name ASC
   `;
@@ -89,17 +89,23 @@ export async function getFullLeaderboard() {
       c.description AS cat_description,
       c.is_active   AS cat_is_active,
       c.created_at  AS cat_created_at,
-      n.id          AS nom_id,
-      n.name        AS nom_name,
-      n.image_url   AS nom_image_url,
-      n.created_at  AS nom_created_at,
+      n.id           AS nom_id,
+      n.name         AS nom_name,
+      n.user_id      AS nom_user_id,
+      n.status       AS nom_status,
+      n.image_url    AS nom_image_url,
+      n.description  AS nom_description,
+      n.site_url     AS nom_site_url,
+      n.video_url    AS nom_video_url,
+      n.what_we_made AS nom_what_we_made,
+      n.created_at   AS nom_created_at,
       COUNT(v.id)::int AS vote_count
     FROM categories c
-    LEFT JOIN nominees n ON n.category_id = c.id
+    LEFT JOIN nominees n ON n.category_id = c.id AND n.status = 'approved'
     LEFT JOIN votes v ON v.nominee_id = n.id
     WHERE c.is_active = true
     GROUP BY c.id, c.name, c.description, c.is_active, c.created_at,
-             n.id, n.name, n.image_url, n.created_at
+             n.id, n.name, n.user_id, n.status, n.image_url, n.description, n.site_url, n.video_url, n.what_we_made, n.created_at
     ORDER BY c.id ASC, vote_count DESC, n.name ASC
   `;
 
@@ -134,7 +140,15 @@ export async function getFullLeaderboard() {
 				id: row.nom_id as number,
 				name: row.nom_name as string,
 				category_id: catId,
+				user_id: row.nom_user_id as string | null,
+				status: row.nom_status as 'approved',
 				image_url: row.nom_image_url as string | null,
+				description:
+					row.nom_description as string | null,
+				site_url: row.nom_site_url as string | null,
+				video_url: row.nom_video_url as string | null,
+				what_we_made:
+					row.nom_what_we_made as string | null,
 				created_at: row.nom_created_at as Date,
 				vote_count: row.vote_count as number,
 			} as Nominee & { vote_count: number });

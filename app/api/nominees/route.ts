@@ -1,5 +1,8 @@
 import { auth } from '@/auth';
-import { isProducerOrAdmin } from '@/lib/auth/permissions';
+import {
+	canVote,
+	isProducerOrAdmin,
+} from '@/lib/auth/permissions';
 import {
 	listAllNominees,
 	createNominee,
@@ -25,7 +28,9 @@ export async function GET() {
 
 export async function POST(req: Request) {
 	const session = await auth();
-	if (!isProducerOrAdmin(session)) {
+	const canManageNominees = isProducerOrAdmin(session);
+
+	if (!canManageNominees && !canVote(session)) {
 		return Response.json(
 			{ error: 'Unauthorized' },
 			{ status: 401 },
@@ -35,7 +40,17 @@ export async function POST(req: Request) {
 	const body = await req.json();
 	const parsed = nomineeSchema.safeParse({
 		...body,
-		image_url: body.image_url || null,
+		image_url:
+			body.image_url === '' ? null : body.image_url,
+		description:
+			body.description === '' ? null : body.description,
+		site_url: body.site_url === '' ? null : body.site_url,
+		video_url:
+			body.video_url === '' ? null : body.video_url,
+		what_we_made:
+			body.what_we_made === ''
+				? null
+				: body.what_we_made,
 	});
 	if (!parsed.success) {
 		return Response.json(
@@ -44,7 +59,13 @@ export async function POST(req: Request) {
 		);
 	}
 
-	const nominee = await createNominee(parsed.data);
+	const nominee = await createNominee({
+		...parsed.data,
+		user_id: canManageNominees
+			? parsed.data.user_id ?? null
+			: session!.user!.id,
+		status: canManageNominees ? 'approved' : 'pending',
+	});
 	return Response.json({ nominee }, { status: 201 });
 }
 
@@ -62,6 +83,15 @@ export async function PATCH(req: Request) {
 		...body,
 		image_url:
 			body.image_url === '' ? null : body.image_url,
+		description:
+			body.description === '' ? null : body.description,
+		site_url: body.site_url === '' ? null : body.site_url,
+		video_url:
+			body.video_url === '' ? null : body.video_url,
+		what_we_made:
+			body.what_we_made === ''
+				? null
+				: body.what_we_made,
 	});
 	if (!parsed.success) {
 		return Response.json(

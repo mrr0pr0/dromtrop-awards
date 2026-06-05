@@ -50,12 +50,23 @@ async function main() {
 		join(root, 'scripts', 'auth-migration.sql'),
 		'utf-8',
 	);
+	const nomineeStatusMigration = readFileSync(
+		join(
+			root,
+			'scripts',
+			'add-nominee-status-migration.sql',
+		),
+		'utf-8',
+	);
 
 	console.log('Applying schema...');
 	await pool.query(schema);
 
 	console.log('Applying auth migration...');
 	await pool.query(authMigration);
+
+	console.log('Applying nominee status migration...');
+	await pool.query(nomineeStatusMigration);
 
 	console.log('Applying seed...');
 	await pool.query(seed);

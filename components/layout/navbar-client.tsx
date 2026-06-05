@@ -13,7 +13,7 @@ import type { Session } from 'next-auth';
 
 interface NavbarClientProps {
 	session: Session | null;
-	activePath?: 'home' | 'vote' | 'results' | 'admin';
+	activePath?: 'home' | 'vote' | 'nominate' | 'results' | 'admin';
 }
 
 export function NavbarClient({
@@ -29,6 +29,7 @@ export function NavbarClient({
 		if (activePathProp) return activePathProp;
 		if (pathname === '/') return 'home';
 		if (pathname.startsWith('/vote')) return 'vote';
+		if (pathname.startsWith('/nominate')) return 'nominate';
 		if (pathname.startsWith('/results')) return 'results';
 		if (pathname.startsWith('/admin')) return 'admin';
 		return 'home';
@@ -79,6 +80,19 @@ export function NavbarClient({
 						)}
 					>
 						Stem
+					</Link>
+				)}
+				{canVote(session) && (
+					<Link
+						href="/nominate"
+						className={cn(
+							'inline-flex min-h-10 shrink-0 items-center rounded-lg px-3 text-sm transition-colors',
+							activePath === 'nominate'
+								? 'bg-gold font-bold text-black'
+								: 'text-white/80 hover:bg-white/10 hover:text-white',
+						)}
+					>
+						Nominer
 					</Link>
 				)}
 				<Link

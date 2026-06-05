@@ -36,7 +36,11 @@ export async function POST(req: Request) {
 	const { categoryId, nomineeId } = parsed.data;
 	const nominee = await getNomineeById(nomineeId);
 
-	if (!nominee || nominee.category_id !== categoryId) {
+	if (
+		!nominee ||
+		nominee.category_id !== categoryId ||
+		nominee.status !== 'approved'
+	) {
 		return Response.json(
 			{ error: 'Nominert finnes ikke i denne kategorien.' },
 			{ status: 400 },
