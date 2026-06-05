@@ -6,8 +6,8 @@ export function Footer() {
 					Drømtorp Awards · Drømtorp videregående skole
 				</p>
 				<p className="mt-1 text-center text-[9px] font-medium text-gold-light/30">
-					Laget av Robert Talberg og Kyrre Corelius · Hosted på egen
-					server og Neon DB
+					Laget av Robert Talberg og Kyrre Corelius · Hosted
+					på egen server og Neon DB
 				</p>
 			</div>
 		</footer>

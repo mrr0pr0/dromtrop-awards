@@ -143,12 +143,10 @@ export async function getFullLeaderboard() {
 				user_id: row.nom_user_id as string | null,
 				status: row.nom_status as 'approved',
 				image_url: row.nom_image_url as string | null,
-				description:
-					row.nom_description as string | null,
+				description: row.nom_description as string | null,
 				site_url: row.nom_site_url as string | null,
 				video_url: row.nom_video_url as string | null,
-				what_we_made:
-					row.nom_what_we_made as string | null,
+				what_we_made: row.nom_what_we_made as string | null,
 				created_at: row.nom_created_at as Date,
 				vote_count: row.vote_count as number,
 			} as Nominee & { vote_count: number });

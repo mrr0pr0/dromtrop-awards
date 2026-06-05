@@ -48,9 +48,7 @@ export async function POST(req: Request) {
 		video_url:
 			body.video_url === '' ? null : body.video_url,
 		what_we_made:
-			body.what_we_made === ''
-				? null
-				: body.what_we_made,
+			body.what_we_made === '' ? null : body.what_we_made,
 	});
 	if (!parsed.success) {
 		return Response.json(
@@ -62,7 +60,7 @@ export async function POST(req: Request) {
 	const nominee = await createNominee({
 		...parsed.data,
 		user_id: canManageNominees
-			? parsed.data.user_id ?? null
+			? (parsed.data.user_id ?? null)
 			: session!.user!.id,
 		status: canManageNominees ? 'approved' : 'pending',
 	});
@@ -89,9 +87,7 @@ export async function PATCH(req: Request) {
 		video_url:
 			body.video_url === '' ? null : body.video_url,
 		what_we_made:
-			body.what_we_made === ''
-				? null
-				: body.what_we_made,
+			body.what_we_made === '' ? null : body.what_we_made,
 	});
 	if (!parsed.success) {
 		return Response.json(

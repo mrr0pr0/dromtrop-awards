@@ -13,7 +13,12 @@ import type { Session } from 'next-auth';
 
 interface NavbarClientProps {
 	session: Session | null;
-	activePath?: 'home' | 'vote' | 'nominate' | 'results' | 'admin';
+	activePath?:
+		| 'home'
+		| 'vote'
+		| 'nominate'
+		| 'results'
+		| 'admin';
 }
 
 export function NavbarClient({

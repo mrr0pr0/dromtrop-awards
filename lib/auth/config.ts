@@ -55,7 +55,11 @@ export const fullAuthConfig: NextAuthConfig = {
 				// Unknown user — register them only once we have a name
 				if (!dbUser) {
 					if (name) {
-						const newUser = await createPendingUser({ email, name, password });
+						const newUser = await createPendingUser({
+							email,
+							name,
+							password,
+						});
 						if (newUser.status === 'approved') {
 							return {
 								id: newUser.id,

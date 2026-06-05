@@ -18,7 +18,9 @@ export function LoginForm({ callbackUrl }: LoginFormProps) {
 	const [showName, setShowName] = useState(false);
 	const [isLoading, setIsLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
-	const [success, setSuccess] = useState<string | null>(null);
+	const [success, setSuccess] = useState<string | null>(
+		null,
+	);
 
 	// Strip any host from callbackUrl so we never redirect off-domain
 	function safeRedirectPath(url: string): string {

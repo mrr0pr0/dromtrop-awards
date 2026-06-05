@@ -9,7 +9,12 @@ import {
 import { cn } from '@/lib/utils/cn';
 
 interface VoteNavbarProps {
-	activePath?: 'vote' | 'home' | 'nominate' | 'results' | 'admin';
+	activePath?:
+		| 'vote'
+		| 'home'
+		| 'nominate'
+		| 'results'
+		| 'admin';
 }
 
 export async function VoteNavbar({

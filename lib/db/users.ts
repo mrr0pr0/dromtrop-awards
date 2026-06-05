@@ -16,7 +16,9 @@ export async function createPendingUser(data: {
 			? 'admin'
 			: 'user';
 	const approved = await isEmailApproved(data.email);
-	const status: UserStatus = approved ? 'approved' : 'pending';
+	const status: UserStatus = approved
+		? 'approved'
+		: 'pending';
 	const password_hash = await hashPassword(data.password);
 	const id = globalThis.crypto.randomUUID();
 	const rows = await sql`
