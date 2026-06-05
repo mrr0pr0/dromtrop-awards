@@ -37,14 +37,22 @@ export default async function HomePage() {
 							temaer og vise frem sine ferdigheter innen
 							digitale medier og teknologi.
 						</p>
-						<Link
-							href={isApproved ? '/vote' : '/login'}
-							className="mt-7 inline-flex min-h-12 items-center justify-center rounded-[10px] bg-gold px-5 font-extrabold text-black transition-all duration-200 hover:-translate-y-0.5 hover:brightness-105"
-						>
-							{isLoggedIn && isApproved
-								? 'Stem nå'
-								: 'Logg inn for å stemme'}
-						</Link>
+						<div className="mt-7 flex items-center gap-3">
+							<Link
+								href={isApproved ? '/vote' : '/login'}
+								className="inline-flex min-h-12 items-center justify-center whitespace-nowrap rounded-[10px] bg-gold px-5 font-extrabold text-black transition-all duration-200 hover:-translate-y-0.5 hover:brightness-105"
+							>
+								{isLoggedIn && isApproved
+									? 'Stem nå'
+									: 'Logg inn for å stemme'}
+							</Link>
+							<Link
+								href={isApproved ? '/nominate' : '/login'}
+								className="inline-flex min-h-12 items-center justify-center whitespace-nowrap rounded-[10px] border border-gold/50 bg-charcoal/50 px-5 font-extrabold text-gold transition-all duration-200 hover:-translate-y-0.5 hover:border-gold hover:bg-gold/10"
+							>
+								Nominer ditt prosjekt
+							</Link>
+						</div>
 					</div>
 					<div
 						className="relative min-h-[240px] overflow-hidden rounded-[20px] border border-gold/25 bg-gradient-to-br from-charcoal via-charcoal to-gold-deep/40 md:min-h-[330px]"
