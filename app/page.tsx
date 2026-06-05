@@ -42,9 +42,7 @@ export default async function HomePage() {
 								href={isApproved ? '/vote' : '/login'}
 								className="inline-flex min-h-12 items-center justify-center whitespace-nowrap rounded-[10px] bg-gold px-5 font-extrabold text-black transition-all duration-200 hover:-translate-y-0.5 hover:brightness-105"
 							>
-								{isLoggedIn && isApproved
-									? 'Stem nå'
-									: 'Logg inn for å stemme'}
+								Stem nå
 							</Link>
 							<Link
 								href={isApproved ? '/nominate' : '/login'}
