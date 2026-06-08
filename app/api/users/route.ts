@@ -1,6 +1,6 @@
 import { auth } from '@/auth';
 import {
-	isProducerOrAdmin,
+	isAdmin,
 	isAdmin,
 } from '@/lib/auth/permissions';
 import {
@@ -16,7 +16,7 @@ import {
 
 export async function GET(req: Request) {
 	const session = await auth();
-	if (!isProducerOrAdmin(session)) {
+	if (!isAdmin(session)) {
 		return Response.json(
 			{ error: 'Unauthorized' },
 			{ status: 401 },
@@ -65,7 +65,7 @@ export async function PATCH(req: Request) {
 		return Response.json({ user });
 	}
 
-	if (!isProducerOrAdmin(session)) {
+	if (!isAdmin(session)) {
 		return Response.json(
 			{ error: 'Unauthorized' },
 			{ status: 401 },

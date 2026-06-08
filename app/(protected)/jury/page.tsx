@@ -2,7 +2,7 @@ export const dynamic = 'force-dynamic';
 
 import { auth } from '@/auth';
 import { redirect } from 'next/navigation';
-import { isJury } from '@/lib/auth/permissions';
+import { isJuryPanel } from '@/lib/auth/permissions';
 import {
 	getAllTop3,
 	getMyJuryVotes,
@@ -11,7 +11,7 @@ import { JuryDashboard } from '@/components/jury/jury-dashboard';
 
 export default async function JuryPage() {
 	const session = await auth();
-	if (!isJury(session)) redirect('/vote');
+	if (!isJuryPanel(session)) redirect('/vote');
 
 	const [categories, myVotes] = await Promise.all([
 		getAllTop3(),

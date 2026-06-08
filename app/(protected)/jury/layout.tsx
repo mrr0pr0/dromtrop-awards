@@ -1,4 +1,4 @@
-import { Navbar } from '@/components/layout/navbar';
+import { JuryNavbar } from '@/components/layout/jury-navbar';
 import { Footer } from '@/components/layout/footer';
 
 export default function JuryLayout({
@@ -8,7 +8,7 @@ export default function JuryLayout({
 }) {
 	return (
 		<div className="min-h-screen bg-black">
-			<Navbar />
+			<JuryNavbar />
 			<main className="mx-auto w-full max-w-[1180px] flex-1 px-3 py-7 sm:px-4 sm:py-10 md:py-14">
 				{children}
 			</main>

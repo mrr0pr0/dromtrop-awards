@@ -1,7 +1,7 @@
 import { auth } from '@/auth';
 import {
 	canVote,
-	isProducerOrAdmin,
+	isAdmin,
 } from '@/lib/auth/permissions';
 import {
 	listAllNominees,
@@ -16,7 +16,7 @@ import {
 
 export async function GET() {
 	const session = await auth();
-	if (!isProducerOrAdmin(session)) {
+	if (!isAdmin(session)) {
 		return Response.json(
 			{ error: 'Unauthorized' },
 			{ status: 401 },
@@ -28,7 +28,7 @@ export async function GET() {
 
 export async function POST(req: Request) {
 	const session = await auth();
-	const canManageNominees = isProducerOrAdmin(session);
+	const canManageNominees = isAdmin(session);
 
 	if (!canManageNominees && !canVote(session)) {
 		return Response.json(
@@ -69,7 +69,7 @@ export async function POST(req: Request) {
 
 export async function PATCH(req: Request) {
 	const session = await auth();
-	if (!isProducerOrAdmin(session)) {
+	if (!isAdmin(session)) {
 		return Response.json(
 			{ error: 'Unauthorized' },
 			{ status: 401 },
@@ -109,7 +109,7 @@ export async function PATCH(req: Request) {
 
 export async function DELETE(req: Request) {
 	const session = await auth();
-	if (!isProducerOrAdmin(session)) {
+	if (!isAdmin(session)) {
 		return Response.json(
 			{ error: 'Unauthorized' },
 			{ status: 401 },

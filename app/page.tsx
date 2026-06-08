@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
 import { auth } from '@/auth';
 import { Navbar } from '@/components/layout/navbar';
 import { Footer } from '@/components/layout/footer';
@@ -11,6 +12,13 @@ export const revalidate = 30;
 
 export default async function HomePage() {
 	const session = await auth();
+	if (
+		(session?.user?.role === 'jury' ||
+			session?.user?.role === 'producer') &&
+		session.user.status === 'approved'
+	) {
+		redirect('/jury');
+	}
 	const user = session?.user;
 	const isLoggedIn = !!user?.email;
 	const isApproved = user?.status === 'approved';

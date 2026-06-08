@@ -1,9 +1,6 @@
 import { auth } from '@/auth';
 import { redirect } from 'next/navigation';
-import {
-	isProducerOrAdmin,
-	isAdmin,
-} from '@/lib/auth/permissions';
+import { isAdmin } from '@/lib/auth/permissions';
 import { Sidebar } from '@/components/layout/sidebar';
 
 export default async function AdminLayout({
@@ -12,7 +9,7 @@ export default async function AdminLayout({
 	children: React.ReactNode;
 }) {
 	const session = await auth();
-	if (!isProducerOrAdmin(session)) {
+	if (!isAdmin(session)) {
 		redirect('/results');
 	}
 

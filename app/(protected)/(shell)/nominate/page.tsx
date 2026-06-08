@@ -2,7 +2,7 @@ import { auth } from '@/auth';
 import { listCategories } from '@/lib/db/categories';
 import {
 	canVote,
-	isProducerOrAdmin,
+	isAdmin,
 } from '@/lib/auth/permissions';
 import { NomineeSubmissionForm } from '@/components/voting/nominee-submission-form';
 
@@ -12,7 +12,7 @@ export default async function NominatePage() {
 	const session = await auth();
 	const categories = await listCategories(true);
 	const canNominate =
-		canVote(session) || isProducerOrAdmin(session);
+		canVote(session) || isAdmin(session);
 
 	return (
 		<div className="space-y-8">

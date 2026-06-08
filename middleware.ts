@@ -21,12 +21,15 @@ export default auth((req) => {
 
 	if (!isProtected) {
 		if (pathname === '/login' && isLoggedIn) {
-			if (role === 'admin' || role === 'producer') {
+			if (role === 'admin') {
 				return NextResponse.redirect(
 					new URL('/admin/dashboard', req.url),
 				);
 			}
-			if (role === 'jury' && status === 'approved') {
+			if (
+				(role === 'jury' || role === 'producer') &&
+				status === 'approved'
+			) {
 				return NextResponse.redirect(
 					new URL('/jury', req.url),
 				);
@@ -55,20 +58,22 @@ export default auth((req) => {
 		);
 	}
 
-	if (
-		(pathname.startsWith('/vote') ||
-			pathname.startsWith('/nominate')) &&
-		role === 'jury'
-	) {
-		return NextResponse.redirect(new URL('/jury', req.url));
+	if (role === 'jury' || role === 'producer') {
+		if (status !== 'approved') {
+			return NextResponse.redirect(
+				new URL('/login?error=pending', req.url),
+			);
+		}
+		if (!pathname.startsWith('/jury')) {
+			return NextResponse.redirect(new URL('/jury', req.url));
+		}
 	}
 
 	if (
 		(pathname.startsWith('/vote') ||
 			pathname.startsWith('/nominate')) &&
 		status !== 'approved' &&
-		role !== 'admin' &&
-		role !== 'producer'
+		role !== 'admin'
 	) {
 		return NextResponse.redirect(
 			new URL('/login?error=pending', req.url),
@@ -76,24 +81,19 @@ export default auth((req) => {
 	}
 
 	if (pathname.startsWith('/admin')) {
-		if (role !== 'admin' && role !== 'producer') {
+		if (role !== 'admin') {
+			if (role === 'jury' || role === 'producer') {
+				return NextResponse.redirect(new URL('/jury', req.url));
+			}
 			return NextResponse.redirect(
 				new URL('/results', req.url),
-			);
-		}
-		if (
-			pathname.startsWith('/admin/users/roles') &&
-			role !== 'admin'
-		) {
-			return NextResponse.redirect(
-				new URL('/admin/users', req.url),
 			);
 		}
 	}
 
 	if (pathname.startsWith('/jury')) {
-		if (role !== 'jury') {
-			if (role === 'admin' || role === 'producer') {
+		if (role !== 'jury' && role !== 'producer') {
+			if (role === 'admin') {
 				return NextResponse.redirect(
 					new URL('/admin/dashboard', req.url),
 				);

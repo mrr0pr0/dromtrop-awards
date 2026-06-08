@@ -4,7 +4,7 @@ import { auth } from '@/auth';
 import { signOut } from '@/auth';
 import {
 	canVote,
-	isProducerOrAdmin,
+	isAdmin,
 } from '@/lib/auth/permissions';
 import { cn } from '@/lib/utils/cn';
 
@@ -22,7 +22,7 @@ export async function VoteNavbar({
 }: VoteNavbarProps) {
 	const session = await auth();
 	const user = session?.user;
-	const isStaff = isProducerOrAdmin(session);
+	const isStaff = isAdmin(session);
 
 	return (
 		<header className="sticky top-0 z-20 flex min-h-[72px] flex-wrap items-center gap-3 border-b border-gold/40 bg-black/95 px-4 py-3 text-white sm:gap-5 sm:px-8 lg:px-14">

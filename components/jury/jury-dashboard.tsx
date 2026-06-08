@@ -95,14 +95,17 @@ export function JuryDashboard({
 	return (
 		<div>
 			<header className="mb-8">
-				<h1 className="font-[family-name:var(--font-display)] text-4xl font-light text-white sm:text-5xl">
-					Jury-avstemning
-				</h1>
-				<p className="mt-2 text-sm text-gold-light">
-					Stem på din favoritt blant de tre mest populære
-					nominerte i hver kategori.
+				<p className="text-xs font-extrabold uppercase tracking-[0.14em] text-gold">
+					Jury
 				</p>
-				<p className="mt-1 text-xs text-white/60">
+				<h1 className="mt-2 font-[family-name:var(--font-display)] text-4xl font-light text-white sm:text-5xl">
+					Stem på det beste
+				</h1>
+				<p className="mt-3 max-w-2xl text-base text-gold-light">
+					Du stemmer som jury. Velg én vinner blant de tre
+					mest populære nominerte i hver kategori.
+				</p>
+				<p className="mt-2 text-sm text-white/60">
 					{votedCount} av {totalCategories} kategorier
 					avgitt
 				</p>

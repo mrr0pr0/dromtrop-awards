@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { signOut } from 'next-auth/react';
 import {
-	isProducerOrAdmin,
+	isAdmin,
 	canVote,
 	isJury,
 } from '@/lib/auth/permissions';
@@ -29,7 +29,7 @@ export function NavbarClient({
 }: NavbarClientProps) {
 	const pathname = usePathname();
 	const user = session?.user;
-	const isStaff = isProducerOrAdmin(session);
+	const isStaff = isAdmin(session);
 
 	// Determine active path based on prop or pathname
 	const getActivePath = () => {

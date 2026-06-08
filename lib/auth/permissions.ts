@@ -1,14 +1,11 @@
 import type { Session } from 'next-auth';
 import type { UserRole, UserStatus } from '@/types';
 
+/** @deprecated Use isAdmin for admin access. Producer is a jury-panel role only. */
 export function isProducerOrAdmin(
 	session: Session | null,
 ): boolean {
-	if (!session?.user) return false;
-	return (
-		session.user.role === 'producer' ||
-		session.user.role === 'admin'
-	);
+	return isAdmin(session);
 }
 
 export function isAdmin(session: Session | null): boolean {
@@ -22,18 +19,27 @@ export function isApproved(
 }
 
 export function isJury(session: Session | null): boolean {
-	return session?.user?.role === 'jury';
+	return isJuryPanel(session);
+}
+
+/** Jury panel members: Dommer (jury) and Produsent (producer). */
+export function isJuryPanel(session: Session | null): boolean {
+	if (!session?.user) return false;
+	return (
+		session.user.role === 'jury' ||
+		session.user.role === 'producer'
+	);
 }
 
 export function canJuryVote(session: Session | null): boolean {
-	if (!isJury(session)) return false;
+	if (!isJuryPanel(session)) return false;
 	if (session?.user?.status !== 'approved') return false;
 	return process.env.JURY_VOTING_OPEN === 'true';
 }
 
 export function canVote(session: Session | null): boolean {
 	if (!session?.user) return false;
-	if (session.user.role === 'jury') return false;
+	if (isJuryPanel(session)) return false;
 	return isApproved(session) || isAdmin(session);
 }
 

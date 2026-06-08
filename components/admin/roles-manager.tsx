@@ -56,7 +56,9 @@ export function RolesManager({ users }: RolesManagerProps) {
 							className="rounded-lg border border-gold/30 bg-black px-2 py-1 text-sm text-white"
 						>
 							<option value="user">Bruker</option>
-							<option value="producer">Produsent</option>
+							<option value="producer">
+								Jury (produsent)
+							</option>
 							<option value="admin">Admin</option>
 							<option value="jury">Dommer (jury)</option>
 						</select>
