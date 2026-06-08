@@ -37,10 +37,29 @@ export function canJuryVote(session: Session | null): boolean {
 	return process.env.JURY_VOTING_OPEN === 'true';
 }
 
+export function isVotingOpen(): boolean {
+	return process.env.VOTING_OPEN === 'true';
+}
+
 export function canVote(session: Session | null): boolean {
 	if (!session?.user) return false;
 	if (isJuryPanel(session)) return false;
 	return isApproved(session) || isAdmin(session);
+}
+
+export function canCastVote(session: Session | null): boolean {
+	return canVote(session) && isVotingOpen();
+}
+
+export function isNominationsOpen(): boolean {
+	return process.env.NOMINATIONS_OPEN === 'true';
+}
+
+export function canSubmitNomination(
+	session: Session | null,
+): boolean {
+	if (isAdmin(session)) return true;
+	return canVote(session) && isNominationsOpen();
 }
 
 export function hasRole(

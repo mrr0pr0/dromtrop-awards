@@ -46,12 +46,8 @@ export function NomineeCard({
 				<h3 className="font-medium text-white">
 					{nominee.name}
 				</h3>
-				{hasVoted ? (
-					<p className="text-xs text-gold-light">
-						{isSelected
-							? 'Din stemme'
-							: 'Du har allerede stemt i denne kategorien'}
-					</p>
+				{isSelected && hasVoted ? (
+					<p className="text-xs text-gold-light">Din stemme</p>
 				) : isOwnNominee ? (
 					<p className="text-xs text-gold-light">
 						Du kan ikke stemme på deg selv
@@ -63,7 +59,11 @@ export function NomineeCard({
 						disabled={isVoting}
 						onClick={() => onVote(nominee.id)}
 					>
-						{isVoting ? 'Stemmer...' : 'Stem'}
+						{isVoting
+							? 'Stemmer...'
+							: hasVoted
+								? 'Bytt stemme'
+								: 'Stem'}
 					</Button>
 				)}
 			</div>

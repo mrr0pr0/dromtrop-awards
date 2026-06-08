@@ -38,6 +38,8 @@ export default async function NomineeDetailPage({
 			: Promise.resolve([]),
 	]);
 
+	const votingOpen = process.env.VOTING_OPEN === 'true';
+
 	return (
 		<NomineeDetailClient
 			nominee={nominee}
@@ -45,6 +47,7 @@ export default async function NomineeDetailPage({
 			userVotes={userVotes}
 			currentUserId={session?.user?.id}
 			nomineeCountInCategory={categoryNominees.length}
+			votingOpen={votingOpen}
 		/>
 	);
 }

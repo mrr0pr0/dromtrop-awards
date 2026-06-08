@@ -100,7 +100,6 @@ export async function getAllTop3(): Promise<CategoryTop3[]> {
 	return Array.from(map.values());
 }
 
-/** Cast a jury vote. Throws on duplicate (caught by API route). */
 export async function castJuryVote(params: {
 	userId: string;
 	categoryId: number;
@@ -109,6 +108,8 @@ export async function castJuryVote(params: {
 	const rows = await sql`
     INSERT INTO jury_votes (user_id, category_id, nominee_id)
     VALUES (${params.userId}, ${params.categoryId}, ${params.nomineeId})
+    ON CONFLICT (user_id, category_id)
+    DO UPDATE SET nominee_id = EXCLUDED.nominee_id, created_at = NOW()
     RETURNING id, user_id, category_id, nominee_id, created_at
   `;
 	return rows[0] as JuryVote;

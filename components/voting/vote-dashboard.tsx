@@ -12,6 +12,7 @@ interface VoteDashboardProps {
 	nominees: Record<number, Nominee[]>;
 	userVotes: Vote[];
 	currentUserId: string | undefined;
+	votingOpen: boolean;
 }
 
 type FilterMode = 'all' | 'open' | 'empty';
@@ -21,6 +22,7 @@ export function VoteDashboard({
 	nominees,
 	userVotes,
 	currentUserId,
+	votingOpen,
 }: VoteDashboardProps) {
 	const [localVotes, setLocalVotes] =
 		useState<Vote[]>(userVotes);
@@ -78,7 +80,7 @@ export function VoteDashboard({
 		categoryId: number,
 		nomineeId: number,
 	) {
-		if (!currentUserId) return;
+		if (!currentUserId || !votingOpen) return;
 
 		setVotingKey(`${categoryId}-${nomineeId}`);
 		setError(null);
@@ -99,6 +101,13 @@ export function VoteDashboard({
 				return;
 			}
 
+			const previousVote = localVotes.find(
+				(v) => v.category_id === categoryId,
+			);
+			const isChange =
+				!!previousVote &&
+				previousVote.nominee_id !== nomineeId;
+
 			const filtered = localVotes.filter(
 				(v) => v.category_id !== categoryId,
 			);
@@ -116,8 +125,12 @@ export function VoteDashboard({
 			);
 			setToast(
 				nominee
-					? `Stemmen på ${nominee.name} er registrert.`
-					: 'Stemmen er registrert.',
+					? isChange
+						? `Stemmen er endret til ${nominee.name}.`
+						: `Stemmen på ${nominee.name} er registrert.`
+					: isChange
+						? 'Stemmen er endret.'
+						: 'Stemmen er registrert.',
 			);
 		} catch {
 			setError('Nettverksfeil. Prøv igjen.');
@@ -249,6 +262,15 @@ export function VoteDashboard({
 				</div>
 			</section>
 
+			{!votingOpen && (
+				<div
+					className="mb-4 rounded-lg border border-gold/40 bg-gold/10 px-4 py-3 text-sm text-gold-light"
+					role="status"
+				>
+					Avstemningen er for øyeblikket stengt.
+				</div>
+			)}
+
 			{error && (
 				<p className="mb-4 rounded-lg border border-gold/40 bg-gold/15 px-4 py-3 text-sm text-gold">
 					{error}
@@ -336,6 +358,7 @@ export function VoteDashboard({
 														votingKey ===
 														`${category.id}-${nominee.id}`
 													}
+													votingOpen={votingOpen}
 													isOwnNominee={
 														!!currentUserId &&
 														nominee.user_id ===

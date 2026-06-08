@@ -2,6 +2,7 @@ import { auth } from '@/auth';
 import {
 	canVote,
 	isAdmin,
+	isNominationsOpen,
 } from '@/lib/auth/permissions';
 import {
 	listAllNominees,
@@ -34,6 +35,13 @@ export async function POST(req: Request) {
 		return Response.json(
 			{ error: 'Unauthorized' },
 			{ status: 401 },
+		);
+	}
+
+	if (!canManageNominees && !isNominationsOpen()) {
+		return Response.json(
+			{ error: 'Nominasjoner er stengt.' },
+			{ status: 403 },
 		);
 	}
 

@@ -18,12 +18,15 @@ export default async function VotePage() {
 			: Promise.resolve([]),
 	]);
 
+	const votingOpen = process.env.VOTING_OPEN === 'true';
+
 	return (
 		<VoteDashboard
 			categories={categories}
 			nominees={nominees}
 			userVotes={userVotes}
 			currentUserId={session?.user?.id}
+			votingOpen={votingOpen}
 		/>
 	);
 }

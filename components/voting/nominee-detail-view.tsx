@@ -17,6 +17,7 @@ interface NomineeDetailViewProps {
 	currentUserId: string | undefined;
 	nomineeCountInCategory: number;
 	votingKey: string | null;
+	votingOpen: boolean;
 	onVote: (
 		categoryId: number,
 		nomineeId: number,
@@ -30,6 +31,7 @@ export function NomineeDetailView({
 	currentUserId,
 	nomineeCountInCategory,
 	votingKey,
+	votingOpen,
 	onVote,
 }: NomineeDetailViewProps) {
 	const [lightboxOpen, setLightboxOpen] = useState(false);
@@ -90,9 +92,11 @@ export function NomineeDetailView({
 								Status
 							</span>
 							<strong className="mt-1 block text-white">
-								{hasVotedInCategory
-									? 'Stemme registrert'
-									: 'Åpen for stemmer'}
+								{!votingOpen
+									? 'Avstemning stengt'
+									: hasVotedInCategory
+										? 'Stemme registrert'
+										: 'Åpen for stemmer'}
 							</strong>
 						</div>
 						<div className="rounded-[14px] border border-gold/25 bg-charcoal p-4">
@@ -100,7 +104,7 @@ export function NomineeDetailView({
 								Stemmegrense
 							</span>
 							<strong className="mt-1 block text-white">
-								Én gang per kategori
+								Én per kategori (kan endres)
 							</strong>
 						</div>
 						<div className="rounded-[14px] border border-gold/25 bg-charcoal p-4">
@@ -133,6 +137,7 @@ export function NomineeDetailView({
 						hasVotedInCategory={hasVotedInCategory}
 						isSelected={isSelected}
 						isVoting={isVoting}
+						votingOpen={votingOpen}
 						isOwnNominee={isOwnNominee}
 						onVote={() => onVote(category.id, nominee.id)}
 						className="mt-6"

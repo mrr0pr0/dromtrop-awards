@@ -63,6 +63,13 @@ export function JuryDashboard({
 				return;
 			}
 
+			const previousVote = localVotes.find(
+				(v) => v.category_id === categoryId,
+			);
+			const isChange =
+				!!previousVote &&
+				previousVote.nominee_id !== nomineeId;
+
 			if (data.vote) {
 				const filtered = localVotes.filter(
 					(v) => v.category_id !== categoryId,
@@ -79,8 +86,12 @@ export function JuryDashboard({
 			);
 			setToast(
 				nominee
-					? `Jury-stemmen på ${nominee.name} er registrert.`
-					: 'Jury-stemmen er registrert.',
+					? isChange
+						? `Jury-stemmen er endret til ${nominee.name}.`
+						: `Jury-stemmen på ${nominee.name} er registrert.`
+					: isChange
+						? 'Jury-stemmen er endret.'
+						: 'Jury-stemmen er registrert.',
 			);
 		} catch {
 			setError('Nettverksfeil. Prøv igjen.');
@@ -282,11 +293,13 @@ function JuryNomineeCard({
 				<span className="inline-flex min-h-11 items-center justify-center rounded-lg border border-gold bg-gold/10 text-sm font-semibold text-gold">
 					Stemt ✓
 				</span>
-			) : !hasVotedInCategory ? (
+			) : (
 				<button
 					type="button"
 					onClick={onVote}
-					disabled={!votingOpen || isVoting}
+					disabled={
+						!votingOpen || isVoting
+					}
 					title={
 						!votingOpen
 							? 'Jury-avstemning er ikke åpen'
@@ -299,9 +312,15 @@ function JuryNomineeCard({
 							: 'cursor-not-allowed border-gold-light/20 bg-gold-light/10 text-white/50 opacity-60',
 					)}
 				>
-					{isVoting ? '...' : 'Stem'}
+					{isVoting
+						? '...'
+						: !votingOpen
+							? 'Stengt'
+							: hasVotedInCategory
+								? 'Bytt stemme'
+								: 'Stem'}
 				</button>
-			) : null}
+			)}
 		</article>
 	);
 }

@@ -15,6 +15,7 @@ interface NomineeListRowProps {
 	hasVotedInCategory: boolean;
 	isSelected: boolean;
 	isVoting: boolean;
+	votingOpen: boolean;
 	isOwnNominee: boolean;
 	onVote: () => void;
 }
@@ -25,6 +26,7 @@ export function NomineeListRow({
 	hasVotedInCategory,
 	isSelected,
 	isVoting,
+	votingOpen,
 	isOwnNominee,
 	onVote,
 }: NomineeListRowProps) {
@@ -84,21 +86,34 @@ export function NomineeListRow({
 					<button
 						type="button"
 						onClick={onVote}
-						disabled={hasVotedInCategory || isVoting}
+						disabled={
+							!votingOpen ||
+							(hasVotedInCategory && isSelected) ||
+							isVoting
+						}
+						title={
+							!votingOpen
+								? 'Avstemningen er stengt'
+								: undefined
+						}
 						className={cn(
 							'min-h-11 w-full rounded-[9px] border text-sm font-extrabold transition-all duration-200 sm:w-[132px]',
 							hasVotedInCategory && isSelected
 								? 'border-success bg-success text-white'
-								: hasVotedInCategory
-									? 'cursor-not-allowed border-gold-light/20 bg-gold-light/10 text-white/50 opacity-60'
-									: 'border-gold bg-gold text-black hover:-translate-y-px',
+								: votingOpen
+									? 'border-gold bg-gold text-black hover:-translate-y-px'
+									: 'cursor-not-allowed border-gold-light/20 bg-gold-light/10 text-white/50 opacity-60',
 						)}
 					>
 						{hasVotedInCategory && isSelected
 							? 'Stemt'
 							: isVoting
 								? '...'
-								: 'Stem'}
+								: !votingOpen
+									? 'Stengt'
+									: hasVotedInCategory
+										? 'Bytt stemme'
+										: 'Stem'}
 					</button>
 				)}
 				<Link

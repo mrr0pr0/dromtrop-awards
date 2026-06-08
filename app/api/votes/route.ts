@@ -1,10 +1,8 @@
 import { auth } from '@/auth';
 import { castVote } from '@/lib/db/votes';
 import { getNomineeById } from '@/lib/db/nominees';
-import { canVote } from '@/lib/auth/permissions';
+import { canVote, isVotingOpen } from '@/lib/auth/permissions';
 import { voteSchema } from '@/lib/validations/vote';
-import { isUniqueViolation } from '@/lib/api/errors';
-
 export async function POST(req: Request) {
 	const session = await auth();
 
@@ -12,6 +10,13 @@ export async function POST(req: Request) {
 		return Response.json(
 			{ error: 'Du har ikke tilgang til å stemme.' },
 			{ status: 401 },
+		);
+	}
+
+	if (!isVotingOpen()) {
+		return Response.json(
+			{ error: 'Avstemningen er stengt.' },
+			{ status: 403 },
 		);
 	}
 
@@ -61,16 +66,7 @@ export async function POST(req: Request) {
 			nomineeId,
 		});
 		return Response.json({ vote });
-	} catch (err) {
-		if (isUniqueViolation(err)) {
-			return Response.json(
-				{
-					error:
-						'Du har allerede stemt i denne kategorien.',
-				},
-				{ status: 409 },
-			);
-		}
+	} catch {
 		return Response.json(
 			{ error: 'Kunne ikke registrere stemme.' },
 			{ status: 500 },

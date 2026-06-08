@@ -10,6 +10,7 @@ interface NomineeDetailClientProps {
 	userVotes: Vote[];
 	currentUserId: string | undefined;
 	nomineeCountInCategory: number;
+	votingOpen: boolean;
 }
 
 export function NomineeDetailClient({
@@ -18,6 +19,7 @@ export function NomineeDetailClient({
 	userVotes,
 	currentUserId,
 	nomineeCountInCategory,
+	votingOpen,
 }: NomineeDetailClientProps) {
 	const [localVotes, setLocalVotes] =
 		useState<Vote[]>(userVotes);
@@ -30,7 +32,7 @@ export function NomineeDetailClient({
 		categoryId: number,
 		nomineeId: number,
 	) {
-		if (!currentUserId) return;
+		if (!currentUserId || !votingOpen) return;
 
 		setVotingKey(`${categoryId}-${nomineeId}`);
 		setError(null);
@@ -71,6 +73,14 @@ export function NomineeDetailClient({
 
 	return (
 		<>
+			{!votingOpen && (
+				<p
+					className="mb-4 rounded-lg border border-gold-deep/40 bg-gold-deep/20 px-4 py-3 text-sm text-gold-light"
+					role="status"
+				>
+					Avstemningen er for øyeblikket stengt.
+				</p>
+			)}
 			{error && (
 				<p className="mb-4 rounded-lg border border-gold-deep/40 bg-gold-deep/20 px-4 py-3 text-sm text-gold-light">
 					{error}
@@ -83,6 +93,7 @@ export function NomineeDetailClient({
 				currentUserId={currentUserId}
 				nomineeCountInCategory={nomineeCountInCategory}
 				votingKey={votingKey}
+				votingOpen={votingOpen}
 				onVote={handleVote}
 			/>
 		</>

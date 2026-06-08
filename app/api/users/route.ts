@@ -1,7 +1,7 @@
 import { auth } from '@/auth';
 import {
 	isAdmin,
-	isAdmin,
+	
 } from '@/lib/auth/permissions';
 import {
 	listUsers,

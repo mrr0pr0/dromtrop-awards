@@ -29,6 +29,7 @@ interface NomineeDisplayProps {
 	hasVotedInCategory?: boolean;
 	isSelected?: boolean;
 	isVoting?: boolean;
+	votingOpen?: boolean;
 	isOwnNominee?: boolean;
 	onVote?: () => void;
 	className?: string;
@@ -43,6 +44,7 @@ export function NomineeDisplay({
 	hasVotedInCategory = false,
 	isSelected = false,
 	isVoting = false,
+	votingOpen = true,
 	isOwnNominee = false,
 	onVote,
 	className,
@@ -97,7 +99,11 @@ export function NomineeDisplay({
 				) : (
 					<Button
 						onClick={onVote}
-						disabled={hasVotedInCategory || isVoting}
+						disabled={
+							!votingOpen ||
+							(hasVotedInCategory && isSelected) ||
+							isVoting
+						}
 						className={cn(
 							'min-h-12 w-full sm:w-auto',
 							hasVotedInCategory &&
@@ -107,11 +113,13 @@ export function NomineeDisplay({
 					>
 						{hasVotedInCategory && isSelected
 							? 'Stemmen er registrert'
-							: hasVotedInCategory
-								? 'Du har stemt i denne kategorien'
-								: isVoting
-									? 'Stemmer...'
-									: `Stem på ${nominee.name}`}
+							: isVoting
+								? 'Stemmer...'
+								: !votingOpen
+									? 'Avstemningen er stengt'
+									: hasVotedInCategory
+										? `Bytt stemme til ${nominee.name}`
+										: `Stem på ${nominee.name}`}
 					</Button>
 				)}
 			</div>

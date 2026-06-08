@@ -4,7 +4,6 @@ import {
 	castJuryVote,
 	getTop3ForCategory,
 } from '@/lib/db/jury-votes';
-import { isUniqueViolation } from '@/lib/api/errors';
 import { voteSchema } from '@/lib/validations/vote';
 
 export async function POST(req: Request) {
@@ -57,13 +56,7 @@ export async function POST(req: Request) {
 			nomineeId,
 		});
 		return Response.json({ vote });
-	} catch (err) {
-		if (isUniqueViolation(err)) {
-			return Response.json(
-				{ error: 'Du har allerede stemt i denne kategorien.' },
-				{ status: 409 },
-			);
-		}
+	} catch {
 		return Response.json(
 			{ error: 'Kunne ikke registrere stemme.' },
 			{ status: 500 },

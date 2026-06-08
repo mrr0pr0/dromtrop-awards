@@ -1,6 +1,7 @@
 import { auth } from '@/auth';
 import { listCategories } from '@/lib/db/categories';
 import {
+	canSubmitNomination,
 	canVote,
 	isAdmin,
 } from '@/lib/auth/permissions';
@@ -11,7 +12,8 @@ export const dynamic = 'force-dynamic';
 export default async function NominatePage() {
 	const session = await auth();
 	const categories = await listCategories(true);
-	const canNominate =
+	const canNominate = canSubmitNomination(session);
+	const isApprovedUser =
 		canVote(session) || isAdmin(session);
 
 	return (
@@ -34,8 +36,9 @@ export default async function NominatePage() {
 					<NomineeSubmissionForm categories={categories} />
 				) : (
 					<p className="text-sm text-gold-light">
-						Du må være godkjent bruker for å sende inn
-						nominerte.
+						{isApprovedUser
+							? 'Nominasjoner er for øyeblikket stengt.'
+							: 'Du må være godkjent bruker for å sende inn nominerte.'}
 					</p>
 				)}
 			</section>
