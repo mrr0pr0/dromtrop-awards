@@ -1,4 +1,4 @@
-export type UserRole = 'user' | 'producer' | 'admin';
+export type UserRole = 'user' | 'producer' | 'admin' | 'jury';
 export type UserStatus =
 	| 'pending'
 	| 'approved'

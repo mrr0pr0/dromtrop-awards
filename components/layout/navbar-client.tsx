@@ -7,6 +7,7 @@ import { signOut } from 'next-auth/react';
 import {
 	isProducerOrAdmin,
 	canVote,
+	isJury,
 } from '@/lib/auth/permissions';
 import { cn } from '@/lib/utils/cn';
 import type { Session } from 'next-auth';
@@ -18,7 +19,8 @@ interface NavbarClientProps {
 		| 'vote'
 		| 'nominate'
 		| 'results'
-		| 'admin';
+		| 'admin'
+		| 'jury';
 }
 
 export function NavbarClient({
@@ -37,6 +39,7 @@ export function NavbarClient({
 		if (pathname.startsWith('/nominate')) return 'nominate';
 		if (pathname.startsWith('/results')) return 'results';
 		if (pathname.startsWith('/admin')) return 'admin';
+		if (pathname.startsWith('/jury')) return 'jury';
 		return 'home';
 	};
 
@@ -98,6 +101,19 @@ export function NavbarClient({
 						)}
 					>
 						Nominer
+					</Link>
+				)}
+				{isJury(session) && (
+					<Link
+						href="/jury"
+						className={cn(
+							'inline-flex min-h-10 shrink-0 items-center rounded-lg px-3 text-sm transition-colors',
+							activePath === 'jury'
+								? 'bg-gold font-bold text-black'
+								: 'text-white/80 hover:bg-white/10 hover:text-white',
+						)}
+					>
+						Dommer
 					</Link>
 				)}
 				<Link

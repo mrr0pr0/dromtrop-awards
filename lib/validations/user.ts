@@ -7,7 +7,7 @@ export const userStatusSchema = z.object({
 
 export const userRoleSchema = z.object({
 	id: z.string().min(1),
-	role: z.enum(['user', 'producer', 'admin']),
+	role: z.enum(['user', 'producer', 'admin', 'jury']),
 });
 
 export const approvedEmailSchema = z.object({

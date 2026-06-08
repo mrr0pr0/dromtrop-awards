@@ -16,13 +16,19 @@ export default auth((req) => {
 		pathname.startsWith('/vote') ||
 		pathname.startsWith('/nominate') ||
 		pathname.startsWith('/results') ||
-		pathname.startsWith('/admin');
+		pathname.startsWith('/admin') ||
+		pathname.startsWith('/jury');
 
 	if (!isProtected) {
 		if (pathname === '/login' && isLoggedIn) {
 			if (role === 'admin' || role === 'producer') {
 				return NextResponse.redirect(
 					new URL('/admin/dashboard', req.url),
+				);
+			}
+			if (role === 'jury' && status === 'approved') {
+				return NextResponse.redirect(
+					new URL('/jury', req.url),
 				);
 			}
 			if (status === 'approved') {
@@ -47,6 +53,14 @@ export default auth((req) => {
 		return NextResponse.redirect(
 			new URL('/login?error=rejected', req.url),
 		);
+	}
+
+	if (
+		(pathname.startsWith('/vote') ||
+			pathname.startsWith('/nominate')) &&
+		role === 'jury'
+	) {
+		return NextResponse.redirect(new URL('/jury', req.url));
 	}
 
 	if (
@@ -77,6 +91,17 @@ export default auth((req) => {
 		}
 	}
 
+	if (pathname.startsWith('/jury')) {
+		if (role !== 'jury') {
+			if (role === 'admin' || role === 'producer') {
+				return NextResponse.redirect(
+					new URL('/admin/dashboard', req.url),
+				);
+			}
+			return NextResponse.redirect(new URL('/vote', req.url));
+		}
+	}
+
 	return NextResponse.next();
 });
 
@@ -86,6 +111,7 @@ export const config = {
 		'/nominate/:path*',
 		'/results/:path*',
 		'/admin/:path*',
+		'/jury/:path*',
 		'/login',
 	],
 };

@@ -21,8 +21,19 @@ export function isApproved(
 	return session?.user?.status === 'approved';
 }
 
+export function isJury(session: Session | null): boolean {
+	return session?.user?.role === 'jury';
+}
+
+export function canJuryVote(session: Session | null): boolean {
+	if (!isJury(session)) return false;
+	if (session?.user?.status !== 'approved') return false;
+	return process.env.JURY_VOTING_OPEN === 'true';
+}
+
 export function canVote(session: Session | null): boolean {
 	if (!session?.user) return false;
+	if (session.user.role === 'jury') return false;
 	return isApproved(session) || isAdmin(session);
 }
 

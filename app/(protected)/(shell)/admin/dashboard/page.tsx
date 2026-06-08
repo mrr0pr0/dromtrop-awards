@@ -10,12 +10,14 @@ import {
 	getRecentUsers,
 } from '@/lib/db/users';
 import { countActiveCategories } from '@/lib/db/categories';
+import { countTotalJuryVotes } from '@/lib/db/jury-votes';
 import { StatCard } from '@/components/admin/stat-card';
 import { Card } from '@/components/ui/card';
 
 export default async function AdminDashboardPage() {
 	const [
 		totalVotes,
+		juryVotes,
 		activeCategories,
 		approvedUsers,
 		pendingUsers,
@@ -23,6 +25,7 @@ export default async function AdminDashboardPage() {
 		recentUsers,
 	] = await Promise.all([
 		countTotalVotes(),
+		countTotalJuryVotes(),
 		countActiveCategories(),
 		countApprovedUsers(),
 		countPendingUsers(),
@@ -39,10 +42,14 @@ export default async function AdminDashboardPage() {
 				Admin-dashbord for Drømtorp Awards 2026
 			</p>
 
-			<div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+			<div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
 				<StatCard
 					label="Totalt stemmer"
 					value={totalVotes}
+				/>
+				<StatCard
+					label="Jury-stemmer"
+					value={juryVotes}
 				/>
 				<StatCard
 					label="Aktive kategorier"

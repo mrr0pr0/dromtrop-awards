@@ -52,3 +52,15 @@ CREATE TABLE IF NOT EXISTS votes (
 CREATE INDEX IF NOT EXISTS idx_nominees_category ON nominees(category_id);
 CREATE INDEX IF NOT EXISTS idx_votes_category ON votes(category_id);
 CREATE INDEX IF NOT EXISTS idx_votes_user ON votes(user_id);
+
+CREATE TABLE IF NOT EXISTS jury_votes (
+  id         SERIAL PRIMARY KEY,
+  user_id    TEXT    NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  category_id INTEGER NOT NULL REFERENCES categories(id) ON DELETE CASCADE,
+  nominee_id  INTEGER NOT NULL REFERENCES nominees(id) ON DELETE CASCADE,
+  created_at  TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(user_id, category_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_jury_votes_category ON jury_votes(category_id);
+CREATE INDEX IF NOT EXISTS idx_jury_votes_user ON jury_votes(user_id);

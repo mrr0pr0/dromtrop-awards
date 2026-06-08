@@ -58,6 +58,7 @@ export function RolesManager({ users }: RolesManagerProps) {
 							<option value="user">Bruker</option>
 							<option value="producer">Produsent</option>
 							<option value="admin">Admin</option>
+							<option value="jury">Dommer (jury)</option>
 						</select>
 					),
 				},
