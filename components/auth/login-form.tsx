@@ -148,6 +148,9 @@ export function LoginForm({ callbackUrl }: LoginFormProps) {
 				Kun godkjente brukere kan logge inn. Første
 				innlogging lagrer passordet ditt.
 			</p>
+			<p className="text-center text-xs font-light italic text-gold-light strong">
+				AFK Epost er godkjent
+			</p>
 		</form>
 	);
 }
