@@ -39,8 +39,9 @@ export default auth((req) => {
 					new URL('/vote', req.url),
 				);
 			}
+			const resultsVisible = process.env.RESULTS_VISIBLE === 'true';
 			return NextResponse.redirect(
-				new URL('/results', req.url),
+				new URL(resultsVisible ? '/results' : '/login', req.url),
 			);
 		}
 		return NextResponse.next();
@@ -80,13 +81,25 @@ export default auth((req) => {
 		);
 	}
 
+	if (pathname.startsWith('/results')) {
+		const resultsVisible = process.env.RESULTS_VISIBLE === 'true';
+		if (!resultsVisible && role !== 'admin') {
+			const fallback =
+				role === 'jury' || role === 'producer'
+					? '/jury'
+					: '/vote';
+			return NextResponse.redirect(new URL(fallback, req.url));
+		}
+	}
+
 	if (pathname.startsWith('/admin')) {
 		if (role !== 'admin') {
 			if (role === 'jury' || role === 'producer') {
 				return NextResponse.redirect(new URL('/jury', req.url));
 			}
+			const resultsVisible = process.env.RESULTS_VISIBLE === 'true';
 			return NextResponse.redirect(
-				new URL('/results', req.url),
+				new URL(resultsVisible ? '/results' : '/vote', req.url),
 			);
 		}
 	}

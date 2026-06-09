@@ -12,11 +12,13 @@ interface NavbarProps {
 
 export async function Navbar({ activePath }: NavbarProps) {
 	const session = await auth();
+	const resultsVisible = process.env.RESULTS_VISIBLE === 'true';
 
 	return (
 		<NavbarClient
 			session={session}
 			activePath={activePath}
+			resultsVisible={resultsVisible}
 		/>
 	);
 }

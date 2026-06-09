@@ -21,17 +21,18 @@ interface NavbarClientProps {
 		| 'results'
 		| 'admin'
 		| 'jury';
+	resultsVisible?: boolean;
 }
 
 export function NavbarClient({
 	session,
 	activePath: activePathProp,
+	resultsVisible = true,
 }: NavbarClientProps) {
 	const pathname = usePathname();
 	const user = session?.user;
 	const isStaff = isAdmin(session);
 
-	// Determine active path based on prop or pathname
 	const getActivePath = () => {
 		if (activePathProp) return activePathProp;
 		if (pathname === '/') return 'home';
@@ -44,6 +45,7 @@ export function NavbarClient({
 	};
 
 	const activePath = getActivePath();
+	const showResultsLink = isStaff || resultsVisible;
 
 	return (
 		<header className="sticky top-0 z-20 flex min-h-[72px] flex-wrap items-center gap-3 border-b border-gold/40 bg-black/95 px-4 py-3 text-white sm:gap-5 sm:px-8 lg:px-14">
@@ -116,17 +118,19 @@ export function NavbarClient({
 						Dommer
 					</Link>
 				)}
-				<Link
-					href="/results"
-					className={cn(
-						'inline-flex min-h-10 shrink-0 items-center rounded-lg px-3 text-sm transition-colors',
-						activePath === 'results'
-							? 'bg-gold font-bold text-black'
-							: 'text-white/80 hover:bg-white/10 hover:text-white',
-					)}
-				>
-					Resultater
-				</Link>
+				{showResultsLink && (
+					<Link
+						href="/results"
+						className={cn(
+							'inline-flex min-h-10 shrink-0 items-center rounded-lg px-3 text-sm transition-colors',
+							activePath === 'results'
+								? 'bg-gold font-bold text-black'
+								: 'text-white/80 hover:bg-white/10 hover:text-white',
+						)}
+					>
+						Resultater
+					</Link>
+				)}
 				{isStaff && (
 					<Link
 						href="/admin/dashboard"
