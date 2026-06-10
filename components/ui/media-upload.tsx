@@ -57,6 +57,96 @@ function hintText(accept: MediaType[]): string {
 	return 'JPG, PNG, WebP eller GIF · maks 5 MB';
 }
 
+async function uploadViaServer(file: File): Promise<string> {
+	const formData = new FormData();
+	formData.append('file', file);
+	const res = await fetch('/api/upload', { method: 'POST', body: formData });
+	if (!res.ok) {
+		const text = await res.text();
+		throw new Error(`Opplasting feilet (${res.status}): ${text}`);
+	}
+	const data = (await res.json()) as { url?: string; error?: string };
+	if (!data.url) throw new Error(data.error ?? 'Ingen URL returnert.');
+	return data.url;
+}
+
+async function uploadDirectToCloudinary(
+	file: File,
+	onProgress?: (pct: number) => void,
+): Promise<string> {
+	// Step 1: get a signed upload credential from our server (fast, no file transfer)
+	const signRes = await fetch('/api/upload/sign', { method: 'POST' });
+	if (!signRes.ok) {
+		// Cloudinary not configured – fall back to server-side upload
+		return uploadViaServer(file);
+	}
+	const { signature, timestamp, folder, apiKey, cloudName } =
+		(await signRes.json()) as {
+			signature: string;
+			timestamp: string;
+			folder: string;
+			apiKey: string;
+			cloudName: string;
+		};
+
+	// Step 2: upload directly from the browser to Cloudinary (no server bottleneck)
+	const isVideo = VIDEO_TYPES.has(file.type);
+	const resourceType = isVideo ? 'video' : 'image';
+	const url = `https://api.cloudinary.com/v1_1/${cloudName}/${resourceType}/upload`;
+
+	const formData = new FormData();
+	formData.append('file', file);
+	formData.append('api_key', apiKey);
+	formData.append('timestamp', timestamp);
+	formData.append('signature', signature);
+	formData.append('folder', folder);
+
+	return new Promise((resolve, reject) => {
+		const xhr = new XMLHttpRequest();
+		xhr.open('POST', url);
+
+		if (onProgress) {
+			xhr.upload.addEventListener('progress', (e) => {
+				if (e.lengthComputable) {
+					onProgress(Math.round((e.loaded / e.total) * 100));
+				}
+			});
+		}
+
+		xhr.onload = () => {
+			if (xhr.status >= 200 && xhr.status < 300) {
+				try {
+					const data = JSON.parse(xhr.responseText) as {
+						secure_url?: string;
+						error?: { message?: string };
+					};
+					if (data.secure_url) {
+						resolve(data.secure_url);
+					} else {
+						reject(
+							new Error(
+								data.error?.message ??
+									'Cloudinary returnerte ingen URL.',
+							),
+						);
+					}
+				} catch {
+					reject(new Error('Ugyldig svar fra Cloudinary.'));
+				}
+			} else {
+				reject(
+					new Error(
+						`Cloudinary-opplasting feilet: ${xhr.status}`,
+					),
+				);
+			}
+		};
+
+		xhr.onerror = () => reject(new Error('Nettverksfeil ved opplasting.'));
+		xhr.send(formData);
+	});
+}
+
 export function MediaUpload({
 	label = 'Mediefil',
 	value,
@@ -66,6 +156,7 @@ export function MediaUpload({
 }: MediaUploadProps) {
 	const inputRef = useRef<HTMLInputElement>(null);
 	const [uploading, setUploading] = useState(false);
+	const [progress, setProgress] = useState<number | null>(null);
 	const [error, setError] = useState<string | null>(null);
 	const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 	const [previewIsVideo, setPreviewIsVideo] = useState(false);
@@ -94,47 +185,29 @@ export function MediaUpload({
 		}
 
 		setError(null);
+		setProgress(null);
 		const objectUrl = URL.createObjectURL(file);
 		setPreviewUrl(objectUrl);
 		setPreviewIsVideo(isVideo);
 		setUploading(true);
 
 		try {
-			const formData = new FormData();
-			formData.append('file', file);
-
-			const res = await fetch('/api/upload', {
-				method: 'POST',
-				body: formData,
+			const url = await uploadDirectToCloudinary(file, (pct) => {
+				setProgress(pct);
 			});
-
-			if (!res.ok) {
-				const text = await res.text();
-				console.error('Upload feil:', text);
-				setError(`Opplasting feilet (${res.status}) – sjekk konsollen`);
-				setPreviewUrl(null);
-				return;
-			}
-
-			const data = (await res.json()) as {
-				url?: string;
-				error?: string;
-			};
-
-			if (!data.url) {
-				setError(data.error ?? 'Kunne ikke laste opp filen.');
-				setPreviewUrl(null);
-				return;
-			}
-
-			onChange(data.url);
+			onChange(url);
 			setPreviewUrl(null);
 		} catch (err) {
 			console.error('Upload exception:', err);
-			setError('Nettverksfeil ved opplasting.');
+			setError(
+				err instanceof Error
+					? err.message
+					: 'Nettverksfeil ved opplasting.',
+			);
 			setPreviewUrl(null);
 		} finally {
 			setUploading(false);
+			setProgress(null);
 		}
 	}
 
@@ -143,6 +216,7 @@ export function MediaUpload({
 		setPreviewUrl(null);
 		setError(null);
 		setPreviewIsVideo(false);
+		setProgress(null);
 	}
 
 	const displayUrl = previewUrl ?? resolveMediaUrl(value);
@@ -208,7 +282,22 @@ export function MediaUpload({
 					className="flex min-h-32 cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-gold/40 bg-charcoal px-4 py-6 text-sm text-gold-light transition-all duration-200 hover:border-gold disabled:cursor-not-allowed disabled:opacity-60"
 				>
 					{uploading ? (
-						<span>Laster opp...</span>
+						<>
+							<span>Laster opp...</span>
+							{progress !== null && (
+								<div className="w-48 overflow-hidden rounded-full bg-gold/20">
+									<div
+										className="h-1.5 rounded-full bg-gold transition-all duration-200"
+										style={{ width: `${progress}%` }}
+									/>
+								</div>
+							)}
+							{progress !== null && (
+								<span className="text-xs text-gold-light/70">
+									{progress}%
+								</span>
+							)}
+						</>
 					) : (
 						<>
 							<span>Klikk for å laste opp</span>
