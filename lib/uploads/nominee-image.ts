@@ -4,7 +4,6 @@ import {
 	buildLocalUploadUrl,
 	ensureNomineesUploadDir,
 } from '@/lib/uploads/local-storage';
-import { toAbsoluteMediaUrl } from '@/lib/uploads/public-url';
 import {
 	buildStoredMediaUrl,
 	getUploadStorage,
@@ -163,7 +162,7 @@ async function uploadToB2(file: File): Promise<string> {
 		throw new Error(`B2 upload feilet: ${res.status} ${text}`);
 	}
 
-	return toAbsoluteMediaUrl(buildStoredMediaUrl(key));
+	return buildStoredMediaUrl(key);
 }
 
 async function uploadToCloudinary(file: File): Promise<string> {
@@ -211,7 +210,7 @@ async function uploadToLocal(file: File): Promise<string> {
 	const dir = await ensureNomineesUploadDir();
 	const buffer = Buffer.from(await file.arrayBuffer());
 	await writeFile(`${dir}/${filename}`, buffer);
-	return toAbsoluteMediaUrl(buildLocalUploadUrl(filename));
+	return buildLocalUploadUrl(filename);
 }
 
 export function validateNomineeFile(file: File): string | null {

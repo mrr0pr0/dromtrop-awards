@@ -1,5 +1,4 @@
 import { createHash, createHmac } from 'crypto';
-import { toAbsoluteMediaUrl } from '@/lib/uploads/public-url';
 
 export type UploadStorage = 'local' | 'b2' | 'cloudinary';
 
@@ -118,14 +117,22 @@ export function isB2StorageUrl(url: string): boolean {
 	return parseB2ObjectKey(url) !== null;
 }
 
-/** Map stored media URLs to browser-ready URLs (public HTTPS when configured). */
+/** Map stored media URLs to browser-ready same-origin paths. */
 export function resolveMediaUrl(
 	url: string | null | undefined,
 ): string | null {
 	if (!url) return null;
 
-	if (url.startsWith('http://') || url.startsWith('https://')) {
-		return url;
+	// Private B2 objects always go through the app proxy.
+	const b2Key = parseB2ObjectKey(url);
+	if (b2Key?.startsWith('nominees/')) {
+		if (
+			typeof window === 'undefined' &&
+			process.env.B2_PUBLIC_BUCKET === 'true'
+		) {
+			return buildB2PublicObjectUrl(b2Key);
+		}
+		return `/api/media/${b2Key}`;
 	}
 
 	if (
@@ -133,17 +140,18 @@ export function resolveMediaUrl(
 		url.startsWith('/api/upload/') ||
 		url.startsWith('/uploads/')
 	) {
-		return toAbsoluteMediaUrl(url);
+		return url;
 	}
 
-	if (isB2Configured()) {
-		const key = parseB2ObjectKey(url);
-		if (key?.startsWith('nominees/')) {
-			if (process.env.B2_PUBLIC_BUCKET === 'true') {
-				return buildB2PublicObjectUrl(key);
-			}
-			return toAbsoluteMediaUrl(`/api/media/${key}`);
+	if (/^https?:\/\//i.test(url)) {
+		if (
+			typeof window !== 'undefined' &&
+			window.location.protocol === 'https:' &&
+			url.startsWith('http://')
+		) {
+			return `https://${url.slice('http://'.length)}`;
 		}
+		return url;
 	}
 
 	return url;

@@ -51,7 +51,10 @@ export function NomineeCard({
 							fill
 							className="object-cover"
 							sizes="(max-width: 768px) 100vw, 300px"
-							unoptimized={mediaUrl.startsWith('/api/media/')}
+							unoptimized={
+								mediaUrl.includes('/api/media/') ||
+								mediaUrl.includes('/api/upload/')
+							}
 						/>
 					)}
 				</div>
