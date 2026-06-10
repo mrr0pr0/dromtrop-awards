@@ -57,53 +57,16 @@ function hintText(accept: MediaType[]): string {
 	return 'JPG, PNG, WebP eller GIF · maks 5 MB';
 }
 
-async function uploadViaServer(file: File): Promise<string> {
-	const formData = new FormData();
-	formData.append('file', file);
-	const res = await fetch('/api/upload', { method: 'POST', body: formData });
-	if (!res.ok) {
-		const text = await res.text();
-		throw new Error(`Opplasting feilet (${res.status}): ${text}`);
-	}
-	const data = (await res.json()) as { url?: string; error?: string };
-	if (!data.url) throw new Error(data.error ?? 'Ingen URL returnert.');
-	return data.url;
-}
-
-async function uploadDirectToCloudinary(
+async function uploadViaServer(
 	file: File,
 	onProgress?: (pct: number) => void,
 ): Promise<string> {
-	// Step 1: get a signed upload credential from our server (fast, no file transfer)
-	const signRes = await fetch('/api/upload/sign', { method: 'POST' });
-	if (!signRes.ok) {
-		// Cloudinary not configured – fall back to server-side upload
-		return uploadViaServer(file);
-	}
-	const { signature, timestamp, folder, apiKey, cloudName } =
-		(await signRes.json()) as {
-			signature: string;
-			timestamp: string;
-			folder: string;
-			apiKey: string;
-			cloudName: string;
-		};
-
-	// Step 2: upload directly from the browser to Cloudinary (no server bottleneck)
-	const isVideo = VIDEO_TYPES.has(file.type);
-	const resourceType = isVideo ? 'video' : 'image';
-	const url = `https://api.cloudinary.com/v1_1/${cloudName}/${resourceType}/upload`;
-
 	const formData = new FormData();
 	formData.append('file', file);
-	formData.append('api_key', apiKey);
-	formData.append('timestamp', timestamp);
-	formData.append('signature', signature);
-	formData.append('folder', folder);
 
 	return new Promise((resolve, reject) => {
 		const xhr = new XMLHttpRequest();
-		xhr.open('POST', url);
+		xhr.open('POST', '/api/upload');
 
 		if (onProgress) {
 			xhr.upload.addEventListener('progress', (e) => {
@@ -117,28 +80,33 @@ async function uploadDirectToCloudinary(
 			if (xhr.status >= 200 && xhr.status < 300) {
 				try {
 					const data = JSON.parse(xhr.responseText) as {
-						secure_url?: string;
-						error?: { message?: string };
+						url?: string;
+						error?: string;
 					};
-					if (data.secure_url) {
-						resolve(data.secure_url);
+					if (data.url) {
+						resolve(data.url);
 					} else {
-						reject(
-							new Error(
-								data.error?.message ??
-									'Cloudinary returnerte ingen URL.',
-							),
-						);
+						reject(new Error(data.error ?? 'Ingen URL returnert.'));
 					}
 				} catch {
-					reject(new Error('Ugyldig svar fra Cloudinary.'));
+					reject(new Error('Ugyldig svar fra serveren.'));
 				}
 			} else {
-				reject(
-					new Error(
-						`Cloudinary-opplasting feilet: ${xhr.status}`,
-					),
-				);
+				try {
+					const data = JSON.parse(xhr.responseText) as {
+						error?: string;
+					};
+					reject(
+						new Error(
+							data.error ??
+								`Opplasting feilet (${xhr.status}).`,
+						),
+					);
+				} catch {
+					reject(
+						new Error(`Opplasting feilet (${xhr.status}).`),
+					);
+				}
 			}
 		};
 
@@ -192,7 +160,7 @@ export function MediaUpload({
 		setUploading(true);
 
 		try {
-			const url = await uploadDirectToCloudinary(file, (pct) => {
+			const url = await uploadViaServer(file, (pct) => {
 				setProgress(pct);
 			});
 			onChange(url);
@@ -247,7 +215,8 @@ export function MediaUpload({
 									className="object-cover"
 									unoptimized={
 										displayUrl.startsWith('blob:') ||
-										displayUrl.startsWith('/api/media/')
+										displayUrl.startsWith('/api/media/') ||
+										displayUrl.startsWith('/api/upload/')
 									}
 								/>
 							</div>

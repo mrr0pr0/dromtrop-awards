@@ -1,5 +1,32 @@
 import { createHash, createHmac } from 'crypto';
 
+export type UploadStorage = 'local' | 'b2' | 'cloudinary';
+
+export function getUploadStorage(): UploadStorage {
+	const mode = process.env.UPLOAD_STORAGE?.trim().toLowerCase();
+	if (mode === 'local' || mode === 'b2' || mode === 'cloudinary') {
+		return mode;
+	}
+	if (isB2Configured()) return 'b2';
+	if (isCloudinaryConfigured()) return 'cloudinary';
+	return 'local';
+}
+
+export function isCloudinaryConfigured(): boolean {
+	return !!(
+		process.env.CLOUDINARY_CLOUD_NAME &&
+		process.env.CLOUDINARY_API_KEY &&
+		process.env.CLOUDINARY_API_SECRET
+	);
+}
+
+export function isLocalUploadUrl(url: string): boolean {
+	return (
+		url.startsWith('/api/upload/') ||
+		url.startsWith('/uploads/')
+	);
+}
+
 export function isB2Configured(): boolean {
 	return !!(
 		process.env.B2_ENDPOINT &&
@@ -95,7 +122,11 @@ export function resolveMediaUrl(
 	url: string | null | undefined,
 ): string | null {
 	if (!url) return null;
-	if (url.startsWith('/api/media/') || url.startsWith('/uploads/')) {
+	if (
+		url.startsWith('/api/media/') ||
+		url.startsWith('/api/upload/') ||
+		url.startsWith('/uploads/')
+	) {
 		return url;
 	}
 	if (!isB2Configured()) return url;

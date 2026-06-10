@@ -3,7 +3,7 @@ import { mkdir, writeFile } from 'fs/promises';
 import path from 'path';
 import {
 	buildStoredMediaUrl,
-	isB2Configured,
+	getUploadStorage,
 	normalizeB2Endpoint,
 } from '@/lib/uploads/b2-media';
 
@@ -39,14 +39,6 @@ function signCloudinaryParams(
 	return createHash('sha1')
 		.update(sorted + apiSecret)
 		.digest('hex');
-}
-
-function isCloudinaryConfigured(): boolean {
-	return !!(
-		process.env.CLOUDINARY_CLOUD_NAME &&
-		process.env.CLOUDINARY_API_KEY &&
-		process.env.CLOUDINARY_API_SECRET
-	);
 }
 
 function getFileExtension(file: File): string {
@@ -216,7 +208,7 @@ async function uploadToLocal(file: File): Promise<string> {
 	await mkdir(dir, { recursive: true });
 	const buffer = Buffer.from(await file.arrayBuffer());
 	await writeFile(path.join(dir, filename), buffer);
-	return `/api/uploads/nominees/${filename}`;
+	return `/api/upload/nominees/${filename}`;
 }
 
 export function validateNomineeFile(file: File): string | null {
@@ -246,13 +238,12 @@ export async function uploadNomineeImage(file: File): Promise<string> {
 		throw new Error(validationError);
 	}
 
-	if (isB2Configured()) {
-		return uploadToB2(file);
+	switch (getUploadStorage()) {
+		case 'b2':
+			return uploadToB2(file);
+		case 'cloudinary':
+			return uploadToCloudinary(file);
+		default:
+			return uploadToLocal(file);
 	}
-
-	if (isCloudinaryConfigured()) {
-		return uploadToCloudinary(file);
-	}
-
-	return uploadToLocal(file);
 }

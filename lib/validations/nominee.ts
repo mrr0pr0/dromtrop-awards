@@ -11,6 +11,7 @@ export const nomineeSchema = z.object({
 		.union([
 			z.string().url(),
 			z.string().regex(/^\/uploads\/.+/),
+			z.string().regex(/^\/api\/upload\/.+/),
 			z.string().regex(/^\/api\/media\/.+/),
 			z.literal(''),
 			z.null(),
