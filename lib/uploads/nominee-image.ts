@@ -141,12 +141,21 @@ export function validateNomineeImageFile(file: File): string | null {
 }
 
 export async function uploadNomineeImage(file: File): Promise<string> {
+	const storage = getUploadStorage();
+	console.error('[nominee-upload] file:', {
+		type: file.type,
+		size: file.size,
+		name: file.name,
+		storage,
+	});
+
 	const validationError = validateNomineeFile(file);
 	if (validationError) {
+		console.error('[nominee-upload] validation failed:', validationError);
 		throw new Error(validationError);
 	}
 
-	switch (getUploadStorage()) {
+	switch (storage) {
 		case 's3':
 			return uploadToObjectStorage(file);
 		case 'cloudinary':

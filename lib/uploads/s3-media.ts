@@ -434,6 +434,14 @@ export async function uploadToS3(
 
 	if (!res.ok) {
 		const text = await res.text();
+		console.error('[s3-upload] PUT failed:', {
+			status: res.status,
+			endpoint: config.endpoint,
+			bucket: config.bucket,
+			key,
+			region: config.region,
+			body: text.slice(0, 500),
+		});
 		if (
 			res.status === 403 &&
 			text.includes('Malformed Access Key Id')
