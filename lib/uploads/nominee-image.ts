@@ -1,6 +1,9 @@
+import { writeFile } from 'fs/promises';
 import { createHash, randomUUID } from 'crypto';
-import { mkdir, writeFile } from 'fs/promises';
-import path from 'path';
+import {
+	buildLocalUploadUrl,
+	ensureNomineesUploadDir,
+} from '@/lib/uploads/local-storage';
 import {
 	buildStoredMediaUrl,
 	getUploadStorage,
@@ -204,11 +207,10 @@ async function uploadToCloudinary(file: File): Promise<string> {
 async function uploadToLocal(file: File): Promise<string> {
 	const ext = getFileExtension(file);
 	const filename = `${randomUUID()}.${ext}`;
-	const dir = path.join(process.cwd(), 'public', 'uploads', 'nominees');
-	await mkdir(dir, { recursive: true });
+	const dir = await ensureNomineesUploadDir();
 	const buffer = Buffer.from(await file.arrayBuffer());
-	await writeFile(path.join(dir, filename), buffer);
-	return `/api/upload/nominees/${filename}`;
+	await writeFile(`${dir}/${filename}`, buffer);
+	return buildLocalUploadUrl(filename);
 }
 
 export function validateNomineeFile(file: File): string | null {
