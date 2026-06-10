@@ -9,6 +9,7 @@ import type {
 	User,
 } from '@/types';
 import { Button } from '@/components/ui/button';
+import { ImageUpload } from '@/components/ui/image-upload';
 import { Input } from '@/components/ui/input';
 import { getVisibleNomineeFields } from '@/lib/voting/category-layout';
 import { DataTable } from './data-table';
@@ -48,7 +49,7 @@ export function NomineesManager({
 		categories[0]?.id?.toString() ?? '',
 	);
 	const [userId, setUserId] = useState('');
-	const [imageUrl, setImageUrl] = useState('');
+	const [imageUrl, setImageUrl] = useState<string | null>(null);
 	const [description, setDescription] = useState('');
 	const [siteUrl, setSiteUrl] = useState('');
 	const [videoUrl, setVideoUrl] = useState('');
@@ -81,7 +82,7 @@ export function NomineesManager({
 		});
 		setName('');
 		setUserId('');
-		setImageUrl('');
+		setImageUrl(null);
 		setDescription('');
 		setSiteUrl('');
 		setVideoUrl('');
@@ -161,11 +162,10 @@ export function NomineesManager({
 						))}
 					</select>
 				</div>
-				<Input
-					label="Bilde-URL (Cloudinary)"
+				<ImageUpload
+					label="Bilde"
 					value={imageUrl}
-					onChange={(e) => setImageUrl(e.target.value)}
-					placeholder="https://res.cloudinary.com/..."
+					onChange={setImageUrl}
 					className="sm:col-span-2"
 				/>
 

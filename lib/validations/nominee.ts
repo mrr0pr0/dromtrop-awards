@@ -8,7 +8,12 @@ export const nomineeSchema = z.object({
 		.enum(['pending', 'approved', 'rejected'])
 		.optional(),
 	image_url: z
-		.union([z.string().url(), z.literal(''), z.null()])
+		.union([
+			z.string().url(),
+			z.string().regex(/^\/uploads\/.+/),
+			z.literal(''),
+			z.null(),
+		])
 		.optional()
 		.transform((v) => (v === '' ? null : (v ?? null))),
 	description: z

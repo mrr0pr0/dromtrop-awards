@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react';
 import type { Category } from '@/types';
 import { Button } from '@/components/ui/button';
+import { ImageUpload } from '@/components/ui/image-upload';
 import { Input } from '@/components/ui/input';
 import { getVisibleNomineeFields } from '@/lib/voting/category-layout';
 
@@ -28,7 +29,7 @@ export function NomineeSubmissionForm({
 	const [categoryId, setCategoryId] = useState(
 		categories[0]?.id?.toString() ?? '',
 	);
-	const [imageUrl, setImageUrl] = useState('');
+	const [imageUrl, setImageUrl] = useState<string | null>(null);
 	const [description, setDescription] = useState('');
 	const [siteUrl, setSiteUrl] = useState('');
 	const [videoUrl, setVideoUrl] = useState('');
@@ -77,7 +78,7 @@ export function NomineeSubmissionForm({
 			}
 
 			setName('');
-			setImageUrl('');
+			setImageUrl(null);
 			setDescription('');
 			setSiteUrl('');
 			setVideoUrl('');
@@ -121,11 +122,10 @@ export function NomineeSubmissionForm({
 				</select>
 			</div>
 
-			<Input
-				label="Bilde-URL"
+			<ImageUpload
+				label="Bilde"
 				value={imageUrl}
-				onChange={(e) => setImageUrl(e.target.value)}
-				placeholder="https://..."
+				onChange={setImageUrl}
 				className="sm:col-span-2"
 			/>
 

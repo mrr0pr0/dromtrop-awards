@@ -33,6 +33,10 @@ yarn-error.log*
 # env files (can opt-in for committing if needed)
 
 
+# uploaded nominee images (local fallback storage)
+/public/uploads/nominees/*
+!/public/uploads/nominees/.gitkeep
+
 # vercel
 .vercel
 
