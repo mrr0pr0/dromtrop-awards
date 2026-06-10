@@ -1,3 +1,4 @@
+import type { Session } from 'next-auth';
 import { auth } from '@/auth';
 import { isAdmin, isApproved, isJuryPanel } from '@/lib/auth/permissions';
 import {
@@ -7,7 +8,7 @@ import {
 
 export const dynamic = 'force-dynamic';
 
-function canAccessMedia(session: Awaited<ReturnType<typeof auth>>): boolean {
+function canAccessMedia(session: Session | null): boolean {
 	if (!session?.user) return false;
 	return (
 		isApproved(session) ||
