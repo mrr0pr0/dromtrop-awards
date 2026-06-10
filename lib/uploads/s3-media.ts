@@ -379,16 +379,24 @@ export async function uploadToS3(
 	const amzDate = now.toISOString().replace(/[:-]/g, '').slice(0, 15) + 'Z';
 	const payloadHash = createHash('sha256').update(buffer).digest('hex');
 
+	const canonicalUri =
+		'/' +
+		[config.bucket, ...key.split('/')]
+			.map((part) => uriEncode(part))
+			.join('/');
+
 	const canonicalHeaders =
+		`content-length:${buffer.length}\n` +
 		`content-type:${file.type}\n` +
 		`host:${host}\n` +
 		`x-amz-content-sha256:${payloadHash}\n` +
 		`x-amz-date:${amzDate}\n`;
-	const signedHeaders = 'content-type;host;x-amz-content-sha256;x-amz-date';
+	const signedHeaders =
+		'content-length;content-type;host;x-amz-content-sha256;x-amz-date';
 
 	const canonicalRequest = [
 		'PUT',
-		`${config.endpoint}/${config.bucket}/${key}`,
+		canonicalUri,
 		'',
 		canonicalHeaders,
 		signedHeaders,
@@ -415,6 +423,7 @@ export async function uploadToS3(
 	const res = await fetch(url, {
 		method: 'PUT',
 		headers: {
+			'Content-Length': String(buffer.length),
 			'Content-Type': file.type,
 			'x-amz-content-sha256': payloadHash,
 			'x-amz-date': amzDate,
