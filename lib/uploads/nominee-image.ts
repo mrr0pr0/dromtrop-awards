@@ -216,7 +216,7 @@ async function uploadToLocal(file: File): Promise<string> {
 	await mkdir(dir, { recursive: true });
 	const buffer = Buffer.from(await file.arrayBuffer());
 	await writeFile(path.join(dir, filename), buffer);
-	return `/uploads/nominees/${filename}`;
+	return `/api/uploads/nominees/${filename}`;
 }
 
 export function validateNomineeFile(file: File): string | null {
