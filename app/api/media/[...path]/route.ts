@@ -2,9 +2,9 @@ import type { Session } from 'next-auth';
 import { auth } from '@/auth';
 import { isAdmin, isApproved, isJuryPanel } from '@/lib/auth/permissions';
 import {
-	createB2PresignedGetUrl,
-	isB2Configured,
-} from '@/lib/uploads/b2-media';
+	createS3PresignedGetUrl,
+	isS3Configured,
+} from '@/lib/uploads/s3-media';
 import { MIME_TYPES } from '@/lib/uploads/local-storage';
 
 export const dynamic = 'force-dynamic';
@@ -28,9 +28,9 @@ export async function GET(
 	req: Request,
 	{ params }: { params: Promise<{ path: string[] }> },
 ) {
-	if (!isB2Configured()) {
+	if (!isS3Configured()) {
 		return Response.json(
-			{ error: 'B2 is not configured.' },
+			{ error: 'S3 storage is not configured.' },
 			{ status: 503 },
 		);
 	}
@@ -47,7 +47,7 @@ export async function GET(
 		return Response.json({ error: 'Invalid media path.' }, { status: 400 });
 	}
 
-	const signedUrl = createB2PresignedGetUrl(key, 3600);
+	const signedUrl = createS3PresignedGetUrl(key, 3600);
 	const rangeHeader = req.headers.get('range');
 	const upstreamHeaders: HeadersInit = {};
 	if (rangeHeader) {

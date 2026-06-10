@@ -7,8 +7,8 @@ import {
 import {
 	buildStoredMediaUrl,
 	getUploadStorage,
-	normalizeB2Endpoint,
-} from '@/lib/uploads/b2-media';
+	uploadToS3,
+} from '@/lib/uploads/s3-media';
 
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
 const MAX_VIDEO_SIZE = 700 * 1024 * 1024;
@@ -64,104 +64,10 @@ function getFileExtension(file: File): string {
 	return mimeMap[file.type] ?? 'bin';
 }
 
-async function uploadToB2(file: File): Promise<string> {
-	// B2 S3-compatible API
-	// B2_ENDPOINT format: https://<accountId>.s3.<region>.backblazeb2.com
-	// or the shorter: https://s3.<region>.backblazeb2.com
-	const endpoint = normalizeB2Endpoint(process.env.B2_ENDPOINT!);
-	const bucket = process.env.B2_BUCKET!.trim();
-	const keyId = process.env.B2_KEY_ID!.trim();
-	const appKey = process.env.B2_APPLICATION_KEY!.trim();
-
+async function uploadToObjectStorage(file: File): Promise<string> {
 	const ext = getFileExtension(file);
 	const key = `nominees/${randomUUID()}.${ext}`;
-	const buffer = Buffer.from(await file.arrayBuffer());
-
-	// Build the upload URL
-	const url = `${endpoint}/${bucket}/${key}`;
-
-	// AWS Signature V4 — manual implementation to avoid needing @aws-sdk
-	const now = new Date();
-	const dateStamp = now.toISOString().slice(0, 10).replace(/-/g, '');
-	const amzDate = now.toISOString().replace(/[:-]/g, '').slice(0, 15) + 'Z';
-
-	// Extract region from endpoint, e.g. "us-west-004" from "s3.us-west-004.backblazeb2.com"
-	const regionMatch = endpoint.match(/s3\.([^.]+)\.backblazeb2\.com/);
-	const region = regionMatch ? regionMatch[1] : 'us-east-005';
-
-	const payloadHash = createHash('sha256').update(buffer).digest('hex');
-	const host = new URL(endpoint).host;
-
-	const canonicalHeaders =
-		`content-type:${file.type}\n` +
-		`host:${host}\n` +
-		`x-amz-content-sha256:${payloadHash}\n` +
-		`x-amz-date:${amzDate}\n`;
-
-	const signedHeaders = 'content-type;host;x-amz-content-sha256;x-amz-date';
-
-	const canonicalRequest = [
-		'PUT',
-		`/${bucket}/${key}`,
-		'',
-		canonicalHeaders,
-		signedHeaders,
-		payloadHash,
-	].join('\n');
-
-	const credentialScope = `${dateStamp}/${region}/s3/aws4_request`;
-	const stringToSign = [
-		'AWS4-HMAC-SHA256',
-		amzDate,
-		credentialScope,
-		createHash('sha256').update(canonicalRequest).digest('hex'),
-	].join('\n');
-
-	function hmac(key: Buffer | string, data: string): Buffer {
-		const { createHmac } = require('crypto');
-		return createHmac('sha256', key).update(data).digest();
-	}
-
-	const signingKey = hmac(
-		hmac(
-			hmac(
-				hmac(Buffer.from('AWS4' + appKey), dateStamp),
-				region,
-			),
-			's3',
-		),
-		'aws4_request',
-	);
-	const signature = hmac(signingKey, stringToSign).toString('hex');
-
-	const authorization =
-		`AWS4-HMAC-SHA256 Credential=${keyId}/${credentialScope}, ` +
-		`SignedHeaders=${signedHeaders}, Signature=${signature}`;
-
-	const res = await fetch(url, {
-		method: 'PUT',
-		headers: {
-			'Content-Type': file.type,
-			'x-amz-content-sha256': payloadHash,
-			'x-amz-date': amzDate,
-			Authorization: authorization,
-		},
-		body: buffer,
-	});
-
-	if (!res.ok) {
-		const text = await res.text();
-		if (
-			res.status === 403 &&
-			text.includes('Malformed Access Key Id')
-		) {
-			throw new Error(
-				'B2 S3-API støtter ikke Master Application Key. Opprett en vanlig Application Key i Backblaze (App Keys → Add a New Application Key) med tilgang til bucketen, og oppdater B2_KEY_ID og B2_APPLICATION_KEY.',
-			);
-		}
-		throw new Error(`B2 upload feilet: ${res.status} ${text}`);
-	}
-
+	await uploadToS3(file, key);
 	return buildStoredMediaUrl(key);
 }
 
@@ -241,8 +147,8 @@ export async function uploadNomineeImage(file: File): Promise<string> {
 	}
 
 	switch (getUploadStorage()) {
-		case 'b2':
-			return uploadToB2(file);
+		case 's3':
+			return uploadToObjectStorage(file);
 		case 'cloudinary':
 			return uploadToCloudinary(file);
 		default:
