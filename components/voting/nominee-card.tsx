@@ -2,6 +2,8 @@
 
 import Image from 'next/image';
 import { cn } from '@/lib/utils/cn';
+import { resolveMediaUrl } from '@/lib/uploads/b2-media';
+import { isVideoMediaUrl } from '@/lib/utils/media-url';
 import { Button } from '@/components/ui/button';
 import type { Nominee } from '@/types';
 
@@ -22,6 +24,8 @@ export function NomineeCard({
 	onVote,
 	isOwnNominee,
 }: NomineeCardProps) {
+	const mediaUrl = resolveMediaUrl(nominee.image_url);
+
 	return (
 		<div
 			className={cn(
@@ -31,15 +35,25 @@ export function NomineeCard({
 					: 'border-gold/20 bg-charcoal hover:border-gold/40',
 			)}
 		>
-			{nominee.image_url && (
+			{mediaUrl && (
 				<div className="relative aspect-video w-full bg-black">
-					<Image
-						src={nominee.image_url}
-						alt={nominee.name}
-						fill
-						className="object-cover"
-						sizes="(max-width: 768px) 100vw, 300px"
-					/>
+					{isVideoMediaUrl(mediaUrl) ? (
+						<video
+							src={mediaUrl}
+							controls
+							playsInline
+							className="h-full w-full object-cover"
+						/>
+					) : (
+						<Image
+							src={mediaUrl}
+							alt={nominee.name}
+							fill
+							className="object-cover"
+							sizes="(max-width: 768px) 100vw, 300px"
+							unoptimized={mediaUrl.startsWith('/api/media/')}
+						/>
+					)}
 				</div>
 			)}
 			<div className="flex flex-1 flex-col gap-3 p-4">

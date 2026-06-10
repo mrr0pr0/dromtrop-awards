@@ -7,6 +7,7 @@ import {
 	categorySlug,
 	getCategoryLayout,
 } from '@/lib/voting/category-layout';
+import { resolveMediaUrl } from '@/lib/uploads/b2-media';
 import { NomineeDisplay } from './nominee-display';
 import { Lightbox } from './lightbox';
 
@@ -47,6 +48,7 @@ export function NomineeDetailView({
 		votingKey === `${category.id}-${nominee.id}`;
 	const isOwnNominee =
 		!!currentUserId && nominee.user_id === currentUserId;
+	const mediaUrl = resolveMediaUrl(nominee.image_url);
 
 	return (
 		<>
@@ -154,10 +156,10 @@ export function NomineeDetailView({
 				</div>
 			</section>
 
-			{layout === 'medie' && nominee.image_url && (
+			{layout === 'medie' && mediaUrl && (
 				<Lightbox
 					isOpen={lightboxOpen}
-					imageUrl={nominee.image_url}
+					imageUrl={mediaUrl}
 					onClose={() => setLightboxOpen(false)}
 				/>
 			)}

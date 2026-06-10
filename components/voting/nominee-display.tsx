@@ -4,6 +4,40 @@ import type { Category, Nominee } from '@/types';
 import { getCategoryLayout } from '@/lib/voting/category-layout';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils/cn';
+import { resolveMediaUrl } from '@/lib/uploads/b2-media';
+import { isVideoMediaUrl } from '@/lib/utils/media-url';
+
+function NomineeImageOrVideo({
+	src,
+	alt,
+	className,
+	onClick,
+}: {
+	src: string;
+	alt: string;
+	className?: string;
+	onClick?: () => void;
+}) {
+	if (isVideoMediaUrl(src)) {
+		return (
+			<video
+				src={src}
+				controls
+				playsInline
+				className={className}
+			/>
+		);
+	}
+
+	return (
+		<img
+			src={src}
+			alt={alt}
+			onClick={onClick}
+			className={className}
+		/>
+	);
+}
 
 export function nomineeInitials(name: string): string {
 	const parts = name.trim().split(/\s+/).filter(Boolean);
@@ -50,6 +84,7 @@ export function NomineeDisplay({
 	className,
 }: NomineeDisplayProps) {
 	const layout = getCategoryLayout(category.name);
+	const mediaUrl = resolveMediaUrl(nominee.image_url);
 
 	if (variant === 'media') {
 		return (
@@ -66,17 +101,20 @@ export function NomineeDisplay({
 						className="absolute inset-0 h-full w-full"
 						allowFullScreen
 					/>
-				) : nominee.image_url ? (
-					<img
-						src={nominee.image_url}
+				) : mediaUrl ? (
+					<NomineeImageOrVideo
+						src={mediaUrl}
 						alt={nominee.name}
 						onClick={
-							layout === 'medie' ? onImageClick : undefined
+							layout === 'medie' && !isVideoMediaUrl(mediaUrl)
+								? onImageClick
+								: undefined
 						}
 						className={cn(
 							'h-full w-full object-cover',
 							layout === 'medie' &&
 								onImageClick &&
+								!isVideoMediaUrl(mediaUrl) &&
 								'cursor-pointer',
 						)}
 					/>
@@ -131,9 +169,9 @@ export function NomineeDisplay({
 				<h3 className="text-lg font-semibold text-gold md:hidden">
 					{nominee.name}
 				</h3>
-				{nominee.image_url && (
-					<img
-						src={nominee.image_url}
+				{mediaUrl && (
+					<NomineeImageOrVideo
+						src={mediaUrl}
 						alt={nominee.name}
 						onClick={onImageClick}
 						className="mb-3 w-full cursor-pointer rounded-lg transition-opacity hover:opacity-80 md:hidden"
@@ -152,9 +190,9 @@ export function NomineeDisplay({
 	if (layout === 'itProduct') {
 		return (
 			<div className={className}>
-				{nominee.image_url && (
-					<img
-						src={nominee.image_url}
+				{mediaUrl && (
+					<NomineeImageOrVideo
+						src={mediaUrl}
 						alt={nominee.name}
 						className="mb-3 w-full rounded-lg md:hidden"
 					/>
@@ -182,9 +220,9 @@ export function NomineeDisplay({
 	if (layout === 'concept') {
 		return (
 			<div className={className}>
-				{nominee.image_url && (
-					<img
-						src={nominee.image_url}
+				{mediaUrl && (
+					<NomineeImageOrVideo
+						src={mediaUrl}
 						alt={nominee.name}
 						className="mb-3 w-full rounded-lg md:hidden"
 					/>
@@ -270,9 +308,9 @@ export function NomineeDisplay({
 	if (layout === 'animation') {
 		return (
 			<div className={className}>
-				{nominee.image_url && (
-					<img
-						src={nominee.image_url}
+				{mediaUrl && (
+					<NomineeImageOrVideo
+						src={mediaUrl}
 						alt={nominee.name}
 						className="mb-4 w-full rounded-lg md:hidden"
 					/>
@@ -285,9 +323,9 @@ export function NomineeDisplay({
 	if (layout === 'storytelling') {
 		return (
 			<div className={className}>
-				{nominee.image_url && (
-					<img
-						src={nominee.image_url}
+				{mediaUrl && (
+					<NomineeImageOrVideo
+						src={mediaUrl}
 						alt={nominee.name}
 						className="mb-3 w-full rounded-lg md:hidden"
 					/>
@@ -304,9 +342,9 @@ export function NomineeDisplay({
 
 	return (
 		<div className={className}>
-			{nominee.image_url && (
-				<img
-					src={nominee.image_url}
+			{mediaUrl && (
+				<NomineeImageOrVideo
+					src={mediaUrl}
 					alt={nominee.name}
 					className="mb-3 w-full rounded-lg"
 				/>

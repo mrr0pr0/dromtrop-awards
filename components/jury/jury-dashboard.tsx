@@ -7,6 +7,7 @@ import type {
 	JuryVote,
 } from '@/lib/db/jury-votes';
 import { nomineeInitials } from '@/components/voting/nominee-display';
+import { resolveMediaUrl } from '@/lib/uploads/b2-media';
 import { cn } from '@/lib/utils/cn';
 
 interface JuryDashboardProps {
@@ -248,7 +249,8 @@ function JuryNomineeCard({
 	votingOpen,
 	onVote,
 }: JuryNomineeCardProps) {
-	const showThumb = !!nominee.image_url;
+	const mediaUrl = resolveMediaUrl(nominee.image_url);
+	const showThumb = !!mediaUrl;
 
 	return (
 		<article
@@ -267,7 +269,7 @@ function JuryNomineeCard({
 			>
 				{showThumb ? (
 					<img
-						src={nominee.image_url!}
+						src={mediaUrl}
 						alt=""
 						className="h-full w-full object-cover"
 					/>

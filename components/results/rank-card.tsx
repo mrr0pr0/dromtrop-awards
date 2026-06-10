@@ -1,4 +1,5 @@
 import Image from 'next/image';
+import { resolveMediaUrl } from '@/lib/uploads/b2-media';
 import type { NomineeWithVotes } from '@/types';
 
 interface RankCardProps {
@@ -6,23 +7,26 @@ interface RankCardProps {
 }
 
 export function RankCard({ nominee }: RankCardProps) {
+	const mediaUrl = resolveMediaUrl(nominee.image_url);
+
 	return (
 		<div className="grid min-h-20 grid-cols-[42px_minmax(0,1fr)] items-center gap-3 rounded-[14px] border border-gold-light/15 bg-parchment/[0.055] px-3 py-3 sm:grid-cols-[48px_64px_minmax(0,1fr)_auto] sm:gap-4">
 			<div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gold/20 text-sm font-black text-gold tabular-nums">
 				{nominee.rank}
 			</div>
-			{nominee.image_url && (
+			{mediaUrl && (
 				<div className="relative hidden h-14 w-14 shrink-0 overflow-hidden rounded-xl border border-gold-light/15 sm:block">
 					<Image
-						src={nominee.image_url}
+						src={mediaUrl}
 						alt={nominee.name}
 						fill
 						className="object-cover"
 						sizes="56px"
+						unoptimized={mediaUrl.startsWith('/api/media/')}
 					/>
 				</div>
 			)}
-			{!nominee.image_url && (
+			{!mediaUrl && (
 				<div
 					aria-hidden="true"
 					className="relative hidden h-14 w-14 shrink-0 overflow-hidden rounded-xl border border-gold-light/15 bg-[linear-gradient(135deg,rgba(201,168,76,0.22),transparent_38%),linear-gradient(160deg,var(--color-charcoal),var(--color-black))] before:absolute before:left-3 before:right-3 before:top-[18px] before:h-[3px] before:rotate-[-10deg] before:rounded-sm before:bg-gold before:opacity-75 after:absolute after:left-3 after:right-3 after:top-[31px] after:h-[3px] after:rotate-[-10deg] after:rounded-sm after:bg-gold-light after:opacity-45 sm:block"

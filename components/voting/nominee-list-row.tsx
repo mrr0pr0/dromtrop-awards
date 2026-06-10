@@ -7,6 +7,7 @@ import {
 	nomineeInitials,
 	nomineeSummaryText,
 } from './nominee-display';
+import { resolveMediaUrl } from '@/lib/uploads/b2-media';
 import { cn } from '@/lib/utils/cn';
 
 interface NomineeListRowProps {
@@ -31,10 +32,11 @@ export function NomineeListRow({
 	onVote,
 }: NomineeListRowProps) {
 	const layout = getCategoryLayout(category.name);
+	const mediaUrl = resolveMediaUrl(nominee.image_url);
 	const showThumb =
 		layout !== 'shortFilm' &&
 		layout !== 'originalIdea' &&
-		nominee.image_url;
+		mediaUrl;
 
 	return (
 		<article className="grid grid-cols-[64px_minmax(0,1fr)] gap-3 border-b border-gold-light/10 px-4 py-5 transition-all duration-200 last:border-b-0 hover:bg-white/5 hover:-translate-y-px sm:grid-cols-[86px_minmax(0,1fr)_auto] sm:gap-5 sm:px-6">
@@ -49,7 +51,7 @@ export function NomineeListRow({
 			>
 				{showThumb ? (
 					<img
-						src={nominee.image_url!}
+						src={mediaUrl}
 						alt=""
 						className="h-full w-full object-cover"
 					/>

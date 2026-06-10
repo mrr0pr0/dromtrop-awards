@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
+import { resolveMediaUrl } from '@/lib/uploads/b2-media';
 import { cn } from '@/lib/utils/cn';
 import { Button } from '@/components/ui/button';
 
@@ -144,9 +145,9 @@ export function MediaUpload({
 		setPreviewIsVideo(false);
 	}
 
-	const displayUrl = previewUrl ?? value;
+	const displayUrl = previewUrl ?? resolveMediaUrl(value);
 	const showAsVideo =
-		previewIsVideo || (!!value && isVideoUrl(value));
+		previewIsVideo || (!!displayUrl && isVideoUrl(displayUrl));
 
 	return (
 		<div className={cn('flex flex-col gap-1.5', className)}>
@@ -170,7 +171,10 @@ export function MediaUpload({
 									alt="Forhåndsvisning"
 									fill
 									className="object-cover"
-									unoptimized={displayUrl.startsWith('blob:')}
+									unoptimized={
+										displayUrl.startsWith('blob:') ||
+										displayUrl.startsWith('/api/media/')
+									}
 								/>
 							</div>
 						)}
