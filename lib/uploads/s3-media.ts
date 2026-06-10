@@ -411,6 +411,7 @@ export async function uploadToS3(
 	const authorization =
 		`AWS4-HMAC-SHA256 Credential=${config.accessKeyId}/${credentialScope}, ` +
 		`SignedHeaders=${signedHeaders}, Signature=${signature}`;
+	console.log('Uploading to S3 with URL:', url);
 
 	const res = await fetch(url, {
 		method: 'PUT',
