@@ -388,7 +388,7 @@ export async function uploadToS3(
 
 	const canonicalRequest = [
 		'PUT',
-		`/${config.bucket}/${key}`,
+		`${config.endpoint}/${config.bucket}/${key}`,
 		'',
 		canonicalHeaders,
 		signedHeaders,
