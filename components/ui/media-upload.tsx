@@ -215,8 +215,8 @@ export function MediaUpload({
 									className="object-cover"
 									unoptimized={
 										displayUrl.startsWith('blob:') ||
-										displayUrl.startsWith('/api/media/') ||
-										displayUrl.startsWith('/api/upload/')
+										displayUrl.includes('/api/media/') ||
+										displayUrl.includes('/api/upload/')
 									}
 								/>
 							</div>

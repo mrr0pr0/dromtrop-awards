@@ -1,4 +1,5 @@
 import { createHash, createHmac } from 'crypto';
+import { toAbsoluteMediaUrl } from '@/lib/uploads/public-url';
 
 export type UploadStorage = 'local' | 'b2' | 'cloudinary';
 
@@ -117,23 +118,32 @@ export function isB2StorageUrl(url: string): boolean {
 	return parseB2ObjectKey(url) !== null;
 }
 
-/** Map stored B2 URLs to same-origin media route with signed redirect. */
+/** Map stored media URLs to browser-ready URLs (public HTTPS when configured). */
 export function resolveMediaUrl(
 	url: string | null | undefined,
 ): string | null {
 	if (!url) return null;
+
+	if (url.startsWith('http://') || url.startsWith('https://')) {
+		return url;
+	}
+
 	if (
 		url.startsWith('/api/media/') ||
 		url.startsWith('/api/upload/') ||
 		url.startsWith('/uploads/')
 	) {
-		return url;
+		return toAbsoluteMediaUrl(url);
 	}
-	if (!isB2Configured()) return url;
 
-	const key = parseB2ObjectKey(url);
-	if (key?.startsWith('nominees/')) {
-		return `/api/media/${key}`;
+	if (isB2Configured()) {
+		const key = parseB2ObjectKey(url);
+		if (key?.startsWith('nominees/')) {
+			if (process.env.B2_PUBLIC_BUCKET === 'true') {
+				return buildB2PublicObjectUrl(key);
+			}
+			return toAbsoluteMediaUrl(`/api/media/${key}`);
+		}
 	}
 
 	return url;
