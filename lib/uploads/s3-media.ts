@@ -420,17 +420,30 @@ export async function uploadToS3(
 		`AWS4-HMAC-SHA256 Credential=${config.accessKeyId}/${credentialScope}, ` +
 		`SignedHeaders=${signedHeaders}, Signature=${signature}`;
 
-	const res = await fetch(url, {
-		method: 'PUT',
-		headers: {
-			'Content-Length': String(buffer.length),
-			'Content-Type': file.type,
-			'x-amz-content-sha256': payloadHash,
-			'x-amz-date': amzDate,
-			Authorization: authorization,
-		},
-		body: buffer,
-	});
+	let res: Response;
+	try {
+		res = await fetch(url, {
+			method: 'PUT',
+			headers: {
+				'Content-Length': String(buffer.length),
+				'Content-Type': file.type,
+				'x-amz-content-sha256': payloadHash,
+				'x-amz-date': amzDate,
+				Authorization: authorization,
+			},
+			body: buffer,
+		});
+	} catch (err) {
+		const cause = err instanceof Error ? (err as NodeJS.ErrnoException).cause ?? err.message : err;
+		console.error('[s3-upload] fetch threw (network error):', {
+			url,
+			endpoint: config.endpoint,
+			bucket: config.bucket,
+			key,
+			cause,
+		});
+		throw err;
+	}
 
 	if (!res.ok) {
 		const text = await res.text();
