@@ -6,6 +6,10 @@ import {
 } from '@/lib/auth/permissions';
 import { uploadNomineeImage } from '@/lib/uploads/nominee-image';
 
+export const maxDuration = 120;
+export const dynamic = 'force-dynamic';
+export const fetchCache = 'force-no-store';
+
 export async function POST(req: Request) {
 	const session = await auth();
 	const canManageNominees = isAdmin(session);
@@ -37,7 +41,7 @@ export async function POST(req: Request) {
 	const file = formData.get('file');
 	if (!(file instanceof File) || file.size === 0) {
 		return Response.json(
-			{ error: 'Velg et bilde å laste opp.' },
+			{ error: 'Velg en fil å laste opp.' },
 			{ status: 400 },
 		);
 	}
@@ -49,7 +53,7 @@ export async function POST(req: Request) {
 		const message =
 			error instanceof Error
 				? error.message
-				: 'Kunne ikke laste opp bildet.';
+				: 'Kunne ikke laste opp filen.';
 		return Response.json({ error: message }, { status: 400 });
 	}
 }

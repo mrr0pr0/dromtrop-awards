@@ -2,13 +2,26 @@ import { createHash, randomUUID } from 'crypto';
 import { mkdir, writeFile } from 'fs/promises';
 import path from 'path';
 
-const MAX_FILE_SIZE = 5 * 1024 * 1024;
-const ALLOWED_TYPES = new Set([
+const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
+const MAX_VIDEO_SIZE = 700 * 1024 * 1024;
+
+const ALLOWED_IMAGE_TYPES = new Set([
 	'image/jpeg',
 	'image/png',
 	'image/webp',
 	'image/gif',
 ]);
+
+const ALLOWED_VIDEO_TYPES = new Set([
+	'video/mp4',
+	'video/webm',
+	'video/ogg',
+	'video/quicktime',
+]);
+
+function isVideo(file: File): boolean {
+	return ALLOWED_VIDEO_TYPES.has(file.type);
+}
 
 function signCloudinaryParams(
 	params: Record<string, string>,
@@ -33,7 +46,8 @@ function isCloudinaryConfigured(): boolean {
 
 function getFileExtension(file: File): string {
 	const fromName = file.name.split('.').pop()?.toLowerCase();
-	if (fromName && ['jpg', 'jpeg', 'png', 'webp', 'gif'].includes(fromName)) {
+	const allExts = ['jpg', 'jpeg', 'png', 'webp', 'gif', 'mp4', 'webm', 'ogg', 'mov'];
+	if (fromName && allExts.includes(fromName)) {
 		return fromName === 'jpeg' ? 'jpg' : fromName;
 	}
 
@@ -42,8 +56,12 @@ function getFileExtension(file: File): string {
 		'image/png': 'png',
 		'image/webp': 'webp',
 		'image/gif': 'gif',
+		'video/mp4': 'mp4',
+		'video/webm': 'webm',
+		'video/ogg': 'ogg',
+		'video/quicktime': 'mov',
 	};
-	return mimeMap[file.type] ?? 'jpg';
+	return mimeMap[file.type] ?? 'bin';
 }
 
 async function uploadToCloudinary(file: File): Promise<string> {
@@ -54,6 +72,7 @@ async function uploadToCloudinary(file: File): Promise<string> {
 	const folder = 'nominees';
 	const params = { folder, timestamp };
 	const signature = signCloudinaryParams(params, apiSecret);
+	const resourceType = isVideo(file) ? 'video' : 'image';
 
 	const formData = new FormData();
 	formData.append('file', file);
@@ -63,16 +82,25 @@ async function uploadToCloudinary(file: File): Promise<string> {
 	formData.append('folder', folder);
 
 	const res = await fetch(
-		`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
+		`https://api.cloudinary.com/v1_1/${cloudName}/${resourceType}/upload`,
 		{ method: 'POST', body: formData },
 	);
 
-	const data = (await res.json()) as {
-		secure_url?: string;
-		error?: { message?: string };
-	};
+	const text = await res.text();
+	let data: { secure_url?: string; error?: { message?: string } };
+	try {
+		data = JSON.parse(text);
+	} catch {
+		if (resourceType === 'video') {
+			return uploadToLocal(file);
+		}
+		throw new Error('Cloudinary svarte med en ugyldig respons.');
+	}
 
 	if (!res.ok || !data.secure_url) {
+		if (resourceType === 'video') {
+			return uploadToLocal(file);
+		}
 		throw new Error(
 			data.error?.message ?? 'Kunne ikke laste opp til Cloudinary.',
 		);
@@ -91,18 +119,29 @@ async function uploadToLocal(file: File): Promise<string> {
 	return `/uploads/nominees/${filename}`;
 }
 
+export function validateNomineeFile(file: File): string | null {
+	if (ALLOWED_IMAGE_TYPES.has(file.type)) {
+		if (file.size > MAX_IMAGE_SIZE) {
+			return 'Bildet kan ikke være større enn 5 MB.';
+		}
+		return null;
+	}
+	if (ALLOWED_VIDEO_TYPES.has(file.type)) {
+		if (file.size > MAX_VIDEO_SIZE) {
+			return 'Videoen kan ikke være større enn 700 MB.';
+		}
+		return null;
+	}
+	return 'Kun JPG, PNG, WebP, GIF, MP4, WebM og MOV er tillatt.';
+}
+
+/** @deprecated Use validateNomineeFile instead */
 export function validateNomineeImageFile(file: File): string | null {
-	if (!ALLOWED_TYPES.has(file.type)) {
-		return 'Kun JPG, PNG, WebP og GIF er tillatt.';
-	}
-	if (file.size > MAX_FILE_SIZE) {
-		return 'Bildet kan ikke være større enn 5 MB.';
-	}
-	return null;
+	return validateNomineeFile(file);
 }
 
 export async function uploadNomineeImage(file: File): Promise<string> {
-	const validationError = validateNomineeImageFile(file);
+	const validationError = validateNomineeFile(file);
 	if (validationError) {
 		throw new Error(validationError);
 	}

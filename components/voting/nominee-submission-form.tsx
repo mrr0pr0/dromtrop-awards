@@ -3,7 +3,7 @@
 import { useMemo, useState } from 'react';
 import type { Category } from '@/types';
 import { Button } from '@/components/ui/button';
-import { ImageUpload } from '@/components/ui/image-upload';
+import { MediaUpload } from '@/components/ui/media-upload';
 import { Input } from '@/components/ui/input';
 import { getVisibleNomineeFields } from '@/lib/voting/category-layout';
 
@@ -122,8 +122,8 @@ export function NomineeSubmissionForm({
 				</select>
 			</div>
 
-			<ImageUpload
-				label="Bilde"
+			<MediaUpload
+				label="Bilde / video"
 				value={imageUrl}
 				onChange={setImageUrl}
 				className="sm:col-span-2"
