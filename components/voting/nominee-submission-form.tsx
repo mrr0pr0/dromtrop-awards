@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react';
 import type { Category } from '@/types';
 import { Button } from '@/components/ui/button';
 import { MediaUpload } from '@/components/ui/media-upload';
+import { FileUpload } from '@/components/ui/file-upload';
 import { Input } from '@/components/ui/input';
 import { getVisibleNomineeFields } from '@/lib/voting/category-layout';
 
@@ -34,6 +35,8 @@ export function NomineeSubmissionForm({
 	const [siteUrl, setSiteUrl] = useState('');
 	const [videoUrl, setVideoUrl] = useState('');
 	const [whatWeMade, setWhatWeMade] = useState('');
+	const [fileUrl, setFileUrl] = useState<string | null>(null);
+	const [fileUrlName, setFileUrlName] = useState<string | null>(null);
 	const [loading, setLoading] = useState(false);
 	const [message, setMessage] = useState<string | null>(
 		null,
@@ -66,6 +69,7 @@ export function NomineeSubmissionForm({
 					site_url: siteUrl || null,
 					video_url: videoUrl || null,
 					what_we_made: whatWeMade || null,
+					file_url: fileUrl || null,
 				}),
 			});
 
@@ -83,6 +87,8 @@ export function NomineeSubmissionForm({
 			setSiteUrl('');
 			setVideoUrl('');
 			setWhatWeMade('');
+			setFileUrl(null);
+			setFileUrlName(null);
 			setMessage(
 				'Nominasjonen er sendt inn og venter på godkjenning.',
 			);
@@ -126,6 +132,14 @@ export function NomineeSubmissionForm({
 				label="Bilde / video"
 				value={imageUrl}
 				onChange={setImageUrl}
+				className="sm:col-span-2"
+			/>
+
+			<FileUpload
+				label="Nedlastbar fil (ZIP / EXE) — valgfritt"
+				value={fileUrl}
+				fileName={fileUrlName}
+				onChange={(url, name) => { setFileUrl(url); setFileUrlName(name); }}
 				className="sm:col-span-2"
 			/>
 

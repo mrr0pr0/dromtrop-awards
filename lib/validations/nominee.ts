@@ -34,6 +34,17 @@ export const nomineeSchema = z.object({
 		.union([z.string(), z.literal(''), z.null()])
 		.optional()
 		.transform((v) => (v === '' ? null : (v ?? null))),
+	file_url: z
+		.union([
+			z.string().url(),
+			z.string().regex(/^\/uploads\/.+/),
+			z.string().regex(/^\/api\/upload\/.+/),
+			z.string().regex(/^\/api\/media\/.+/),
+			z.literal(''),
+			z.null(),
+		])
+		.optional()
+		.transform((v) => (v === '' ? null : (v ?? null))),
 });
 
 export const nomineeUpdateSchema = nomineeSchema

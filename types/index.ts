@@ -43,6 +43,7 @@ export interface Nominee {
 	site_url?: string | null;
 	video_url?: string | null;
 	what_we_made?: string | null;
+	file_url?: string | null;
 	created_at: Date;
 }
 
