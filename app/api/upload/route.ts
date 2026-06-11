@@ -31,7 +31,8 @@ export async function POST(req: Request) {
 	let formData: FormData;
 	try {
 		formData = await req.formData();
-	} catch {
+	} catch (err) {
+		console.error('[upload] formData parse failed:', err);
 		return Response.json(
 			{ error: 'Ugyldig opplastingsforespørsel.' },
 			{ status: 400 },
@@ -40,6 +41,10 @@ export async function POST(req: Request) {
 
 	const file = formData.get('file');
 	if (!(file instanceof File) || file.size === 0) {
+		console.error('[upload] invalid file:', {
+			type: file instanceof File ? file.type : typeof file,
+			size: file instanceof File ? file.size : 'n/a',
+		});
 		return Response.json(
 			{ error: 'Velg en fil å laste opp.' },
 			{ status: 400 },
@@ -54,6 +59,7 @@ export async function POST(req: Request) {
 			error instanceof Error
 				? error.message
 				: 'Kunne ikke laste opp filen.';
+		console.error('[upload] uploadNomineeImage failed:', message);
 		return Response.json({ error: message }, { status: 400 });
 	}
 }

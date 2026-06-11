@@ -379,16 +379,24 @@ export async function uploadToS3(
 	const amzDate = now.toISOString().replace(/[:-]/g, '').slice(0, 15) + 'Z';
 	const payloadHash = createHash('sha256').update(buffer).digest('hex');
 
+	const canonicalUri =
+		'/' +
+		[config.bucket, ...key.split('/')]
+			.map((part) => uriEncode(part))
+			.join('/');
+
 	const canonicalHeaders =
+		`content-length:${buffer.length}\n` +
 		`content-type:${file.type}\n` +
 		`host:${host}\n` +
 		`x-amz-content-sha256:${payloadHash}\n` +
 		`x-amz-date:${amzDate}\n`;
-	const signedHeaders = 'content-type;host;x-amz-content-sha256;x-amz-date';
+	const signedHeaders =
+		'content-length;content-type;host;x-amz-content-sha256;x-amz-date';
 
 	const canonicalRequest = [
 		'PUT',
-		`${config.endpoint}/${config.bucket}/${key}`,
+		canonicalUri,
 		'',
 		canonicalHeaders,
 		signedHeaders,
@@ -412,19 +420,41 @@ export async function uploadToS3(
 		`AWS4-HMAC-SHA256 Credential=${config.accessKeyId}/${credentialScope}, ` +
 		`SignedHeaders=${signedHeaders}, Signature=${signature}`;
 
-	const res = await fetch(url, {
-		method: 'PUT',
-		headers: {
-			'Content-Type': file.type,
-			'x-amz-content-sha256': payloadHash,
-			'x-amz-date': amzDate,
-			Authorization: authorization,
-		},
-		body: buffer,
-	});
+	let res: Response;
+	try {
+		res = await fetch(url, {
+			method: 'PUT',
+			headers: {
+				'Content-Length': String(buffer.length),
+				'Content-Type': file.type,
+				'x-amz-content-sha256': payloadHash,
+				'x-amz-date': amzDate,
+				Authorization: authorization,
+			},
+			body: buffer,
+		});
+	} catch (err) {
+		const cause = err instanceof Error ? (err as NodeJS.ErrnoException).cause ?? err.message : err;
+		console.error('[s3-upload] fetch threw (network error):', {
+			url,
+			endpoint: config.endpoint,
+			bucket: config.bucket,
+			key,
+			cause,
+		});
+		throw err;
+	}
 
 	if (!res.ok) {
 		const text = await res.text();
+		console.error('[s3-upload] PUT failed:', {
+			status: res.status,
+			endpoint: config.endpoint,
+			bucket: config.bucket,
+			key,
+			region: config.region,
+			body: text.slice(0, 500),
+		});
 		if (
 			res.status === 403 &&
 			text.includes('Malformed Access Key Id')
