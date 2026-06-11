@@ -85,12 +85,6 @@ export function FileUpload({
 		e.target.value = '';
 		if (!file) return;
 
-		const ext = file.name.split('.').pop()?.toLowerCase();
-		if (ext !== 'zip' && ext !== 'exe') {
-			setError('Kun ZIP og EXE filer er tillatt.');
-			return;
-		}
-
 		setError(null);
 		setProgress(null);
 		setUploading(true);
@@ -208,7 +202,6 @@ export function FileUpload({
 			<input
 				ref={inputRef}
 				type="file"
-				accept=".zip,.exe,application/zip,application/x-zip-compressed,application/octet-stream,application/x-msdownload"
 				className="hidden"
 				onChange={handleFileChange}
 			/>
