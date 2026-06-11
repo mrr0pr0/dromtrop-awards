@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import type { Category, Nominee } from '@/types';
 import { getCategoryLayout } from '@/lib/voting/category-layout';
@@ -8,7 +9,62 @@ import {
 	nomineeSummaryText,
 } from './nominee-display';
 import { resolveMediaUrl } from '@/lib/uploads/b2-media';
+import { isVideoMediaUrl } from '@/lib/utils/media-url';
 import { cn } from '@/lib/utils/cn';
+
+function VideoThumbnail({ src, fallback }: { src: string; fallback: string }) {
+	const videoRef = useRef<HTMLVideoElement>(null);
+	const [poster, setPoster] = useState<string | null>(null);
+
+	useEffect(() => {
+		const video = document.createElement('video');
+		video.crossOrigin = 'anonymous';
+		video.muted = true;
+		video.playsInline = true;
+		video.src = src;
+		video.currentTime = 0.5;
+
+		video.addEventListener('seeked', () => {
+			try {
+				const canvas = document.createElement('canvas');
+				canvas.width = video.videoWidth || 320;
+				canvas.height = video.videoHeight || 180;
+				const ctx = canvas.getContext('2d');
+				if (ctx) {
+					ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+					setPoster(canvas.toDataURL('image/jpeg', 0.8));
+				}
+			} catch {
+				// cross-origin or codec issue — just leave poster null
+			}
+		}, { once: true });
+
+		video.load();
+	}, [src]);
+
+	if (poster) {
+		return (
+			<img
+				src={poster}
+				alt=""
+				className="h-full w-full object-cover"
+			/>
+		);
+	}
+
+	// While loading, show a dark background with a play icon
+	return (
+		<div className="flex h-full w-full items-center justify-center bg-charcoal">
+			<svg
+				className="h-7 w-7 text-gold-light/60"
+				fill="currentColor"
+				viewBox="0 0 24 24"
+			>
+				<path d="M8 5v14l11-7z" />
+			</svg>
+		</div>
+	);
+}
 
 interface NomineeListRowProps {
 	nominee: Nominee;
@@ -33,6 +89,7 @@ export function NomineeListRow({
 }: NomineeListRowProps) {
 	const layout = getCategoryLayout(category.name);
 	const mediaUrl = resolveMediaUrl(nominee.image_url);
+	const isVideo = !!mediaUrl && isVideoMediaUrl(mediaUrl);
 	const showThumb =
 		layout !== 'shortFilm' &&
 		layout !== 'originalIdea' &&
@@ -50,11 +107,25 @@ export function NomineeListRow({
 				aria-hidden={!showThumb}
 			>
 				{showThumb ? (
-					<img
-						src={mediaUrl}
-						alt=""
-						className="h-full w-full object-cover"
-					/>
+					isVideo ? (
+						<VideoThumbnail src={mediaUrl} fallback={nomineeInitials(nominee.name)} />
+					) : (
+						<img
+							src={mediaUrl}
+							alt=""
+							className="h-full w-full object-cover"
+							onError={(e) => {
+								const el = e.currentTarget;
+								el.style.display = 'none';
+								const parent = el.parentElement;
+								if (parent) {
+									parent.className = parent.className
+										.replace('bg-charcoal', 'bg-gradient-to-br from-gold/20 to-gold-light/30 font-[family-name:var(--font-display)] text-2xl font-bold text-gold-light sm:text-[28px]');
+									parent.textContent = nomineeInitials(nominee.name);
+								}
+							}}
+						/>
+					)
 				) : (
 					nomineeInitials(nominee.name)
 				)}
