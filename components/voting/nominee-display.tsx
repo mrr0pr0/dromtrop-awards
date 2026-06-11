@@ -7,6 +7,55 @@ import { cn } from '@/lib/utils/cn';
 import { resolveMediaUrl } from '@/lib/uploads/b2-media';
 import { isVideoMediaUrl } from '@/lib/utils/media-url';
 
+/** Returns true if the URL points to a downloadable file (exe, zip, etc.) */
+function isDownloadableFile(url: string): boolean {
+	const lower = url.toLowerCase().split('?')[0];
+	return /\.(exe|zip|rar|7z|tar|gz|msi|dmg|apk|pkg|deb|rpm|jar)$/.test(lower);
+}
+
+/** Extracts a filename from a URL for use as the download attribute */
+function getDownloadFilename(url: string): string {
+	try {
+		const pathname = new URL(url, 'http://x').pathname;
+		const parts = pathname.split('/').filter(Boolean);
+		return parts[parts.length - 1] ?? 'download';
+	} catch {
+		return 'download';
+	}
+}
+
+function FileDownloadButton({ fileUrl, nomineeName }: { fileUrl: string; nomineeName: string }) {
+	const resolvedUrl = resolveMediaUrl(fileUrl);
+	if (!resolvedUrl) return null;
+
+	const filename = getDownloadFilename(resolvedUrl);
+	const ext = filename.split('.').pop()?.toUpperCase() ?? 'FIL';
+
+	return (
+		<a
+			href={resolvedUrl}
+			download={filename}
+			className="mb-4 inline-flex min-h-11 items-center gap-2 rounded-lg border border-gold/40 bg-gold/10 px-4 py-2 text-sm font-semibold text-gold transition-colors hover:bg-gold/20 hover:text-gold-light"
+		>
+			<svg
+				xmlns="http://www.w3.org/2000/svg"
+				className="h-4 w-4 shrink-0"
+				viewBox="0 0 24 24"
+				fill="none"
+				stroke="currentColor"
+				strokeWidth="2"
+				strokeLinecap="round"
+				strokeLinejoin="round"
+			>
+				<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+				<polyline points="7 10 12 15 17 10" />
+				<line x1="12" y1="15" x2="12" y2="3" />
+			</svg>
+			Last ned {ext} – {nomineeName}
+		</a>
+	);
+}
+
 function NomineeImageOrVideo({
 	src,
 	alt,
@@ -300,6 +349,11 @@ export function NomineeDisplay({
 						Åpne interaktivt →
 					</a>
 				)}
+				{nominee.file_url && isDownloadableFile(nominee.file_url) && (
+					<div className="mb-0">
+						<FileDownloadButton fileUrl={nominee.file_url} nomineeName={nominee.name} />
+					</div>
+				)}
 				{voteBlock}
 			</div>
 		);
@@ -353,6 +407,9 @@ export function NomineeDisplay({
 				<p className="mb-4 text-sm text-gold-light">
 					{nominee.description}
 				</p>
+			)}
+			{nominee.file_url && isDownloadableFile(nominee.file_url) && (
+				<FileDownloadButton fileUrl={nominee.file_url} nomineeName={nominee.name} />
 			)}
 			{voteBlock}
 		</div>

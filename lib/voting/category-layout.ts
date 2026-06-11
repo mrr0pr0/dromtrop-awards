@@ -13,7 +13,8 @@ export type NomineeFieldKey =
 	| 'description'
 	| 'site_url'
 	| 'video_url'
-	| 'what_we_made';
+	| 'what_we_made'
+	| 'file_url';
 
 function normalizeCategory(name: string): string {
 	return name.trim().toLowerCase();
@@ -66,7 +67,7 @@ const LAYOUT_FIELDS: Record<
 	concept: ['description'],
 	shortFilm: ['description', 'video_url'],
 	originalIdea: ['description', 'what_we_made'],
-	interactive: ['description', 'site_url'],
+	interactive: ['description', 'site_url', 'file_url'],
 	animation: [],
 	storytelling: ['description'],
 	default: [],
