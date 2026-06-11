@@ -1,16 +1,12 @@
 import { sql } from './client';
 import type { Nominee } from '@/types';
 
-/**
- * Fetches all approved nominees for multiple categories in one query.
- * Returns a map of category_id → Nominee[].
- */
 export async function listApprovedNomineesGrouped(
 	categoryIds: number[],
 ): Promise<Record<number, Nominee[]>> {
 	if (categoryIds.length === 0) return {};
 	const rows = await sql`
-    SELECT id, name, category_id, user_id, status, image_url, description, site_url, video_url, what_we_made, created_at
+    SELECT id, name, category_id, user_id, status, image_url, description, site_url, video_url, what_we_made, file_url, created_at
     FROM nominees
     WHERE category_id = ANY(${categoryIds}::int[]) AND status = 'approved'
     ORDER BY name ASC
@@ -26,7 +22,7 @@ export async function listNomineesByCategory(
 	categoryId: number,
 ): Promise<Nominee[]> {
 	const rows = await sql`
-    SELECT id, name, category_id, user_id, status, image_url, description, site_url, video_url, what_we_made, created_at
+    SELECT id, name, category_id, user_id, status, image_url, description, site_url, video_url, what_we_made, file_url, created_at
     FROM nominees
     WHERE category_id = ${categoryId} AND status = 'approved'
     ORDER BY name ASC
@@ -38,7 +34,7 @@ export async function listAllNominees(): Promise<
 	(Nominee & { category_name: string })[]
 > {
 	const rows = await sql`
-    SELECT n.id, n.name, n.category_id, n.user_id, n.status, n.image_url, n.description, n.site_url, n.video_url, n.what_we_made, n.created_at, c.name AS category_name
+    SELECT n.id, n.name, n.category_id, n.user_id, n.status, n.image_url, n.description, n.site_url, n.video_url, n.what_we_made, n.file_url, n.created_at, c.name AS category_name
     FROM nominees n
     JOIN categories c ON c.id = n.category_id
     ORDER BY
@@ -53,7 +49,7 @@ export async function getNomineeById(
 	id: number,
 ): Promise<Nominee | null> {
 	const rows = await sql`
-    SELECT id, name, category_id, user_id, status, image_url, description, site_url, video_url, what_we_made, created_at
+    SELECT id, name, category_id, user_id, status, image_url, description, site_url, video_url, what_we_made, file_url, created_at
     FROM nominees WHERE id = ${id} LIMIT 1
   `;
 	return (rows[0] as Nominee) ?? null;
@@ -69,11 +65,12 @@ export async function createNominee(data: {
 	site_url?: string | null;
 	video_url?: string | null;
 	what_we_made?: string | null;
+	file_url?: string | null;
 }): Promise<Nominee> {
 	const rows = await sql`
-    INSERT INTO nominees (name, category_id, user_id, status, image_url, description, site_url, video_url, what_we_made)
-    VALUES (${data.name}, ${data.category_id}, ${data.user_id ?? null}, ${data.status ?? 'pending'}, ${data.image_url ?? null}, ${data.description ?? null}, ${data.site_url ?? null}, ${data.video_url ?? null}, ${data.what_we_made ?? null})
-    RETURNING id, name, category_id, user_id, status, image_url, description, site_url, video_url, what_we_made, created_at
+    INSERT INTO nominees (name, category_id, user_id, status, image_url, description, site_url, video_url, what_we_made, file_url)
+    VALUES (${data.name}, ${data.category_id}, ${data.user_id ?? null}, ${data.status ?? 'pending'}, ${data.image_url ?? null}, ${data.description ?? null}, ${data.site_url ?? null}, ${data.video_url ?? null}, ${data.what_we_made ?? null}, ${data.file_url ?? null})
+    RETURNING id, name, category_id, user_id, status, image_url, description, site_url, video_url, what_we_made, file_url, created_at
   `;
 	return rows[0] as Nominee;
 }
@@ -90,6 +87,7 @@ export async function updateNominee(
 		site_url?: string | null;
 		video_url?: string | null;
 		what_we_made?: string | null;
+		file_url?: string | null;
 	},
 ): Promise<Nominee | null> {
 	// COALESCE lets Postgres keep the existing value when we pass NULL for an
@@ -116,9 +114,12 @@ export async function updateNominee(
                          ELSE video_url END,
       what_we_made = CASE WHEN ${data.what_we_made !== undefined}::boolean
                           THEN ${data.what_we_made ?? null}
-                          ELSE what_we_made END
+                          ELSE what_we_made END,
+      file_url    = CASE WHEN ${data.file_url !== undefined}::boolean
+                         THEN ${data.file_url ?? null}
+                         ELSE file_url END
     WHERE id = ${id}
-    RETURNING id, name, category_id, user_id, status, image_url, description, site_url, video_url, what_we_made, created_at
+    RETURNING id, name, category_id, user_id, status, image_url, description, site_url, video_url, what_we_made, file_url, created_at
   `;
 	return (rows[0] as Nominee) ?? null;
 }

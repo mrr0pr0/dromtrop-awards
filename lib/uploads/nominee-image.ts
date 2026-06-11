@@ -12,6 +12,7 @@ import {
 
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
 const MAX_VIDEO_SIZE = 700 * 1024 * 1024;
+const MAX_FILE_SIZE = 500 * 1024 * 1024;
 
 const ALLOWED_IMAGE_TYPES = new Set([
 	'image/jpeg',
@@ -25,6 +26,15 @@ const ALLOWED_VIDEO_TYPES = new Set([
 	'video/webm',
 	'video/ogg',
 	'video/quicktime',
+]);
+
+const ALLOWED_FILE_TYPES = new Set([
+	'application/zip',
+	'application/x-zip-compressed',
+	'application/x-zip',
+	'application/octet-stream',
+	'application/x-msdownload',
+	'application/x-dosexec',
 ]);
 
 function isVideo(file: File): boolean {
@@ -46,7 +56,7 @@ function signCloudinaryParams(
 
 function getFileExtension(file: File): string {
 	const fromName = file.name.split('.').pop()?.toLowerCase();
-	const allExts = ['jpg', 'jpeg', 'png', 'webp', 'gif', 'mp4', 'webm', 'ogg', 'mov'];
+	const allExts = ['jpg', 'jpeg', 'png', 'webp', 'gif', 'mp4', 'webm', 'ogg', 'mov', 'zip', 'exe'];
 	if (fromName && allExts.includes(fromName)) {
 		return fromName === 'jpeg' ? 'jpg' : fromName;
 	}
@@ -60,6 +70,12 @@ function getFileExtension(file: File): string {
 		'video/webm': 'webm',
 		'video/ogg': 'ogg',
 		'video/quicktime': 'mov',
+		'application/zip': 'zip',
+		'application/x-zip-compressed': 'zip',
+		'application/x-zip': 'zip',
+		'application/x-msdownload': 'exe',
+		'application/x-dosexec': 'exe',
+		'application/octet-stream': fromName ?? 'bin',
 	};
 	return mimeMap[file.type] ?? 'bin';
 }
@@ -132,7 +148,28 @@ export function validateNomineeFile(file: File): string | null {
 		}
 		return null;
 	}
-	return 'Kun JPG, PNG, WebP, GIF, MP4, WebM og MOV er tillatt.';
+	// Allow zip/exe by extension as a fallback since browsers report octet-stream
+	const ext = file.name.split('.').pop()?.toLowerCase();
+	const isZipOrExe = ext === 'zip' || ext === 'exe';
+	if (ALLOWED_FILE_TYPES.has(file.type) || isZipOrExe) {
+		if (file.size > MAX_FILE_SIZE) {
+			return 'Filen kan ikke være større enn 500 MB.';
+		}
+		return null;
+	}
+	return 'Kun JPG, PNG, WebP, GIF, MP4, WebM, MOV, ZIP og EXE er tillatt.';
+}
+
+export function validateNomineeDownloadFile(file: File): string | null {
+	const ext = file.name.split('.').pop()?.toLowerCase();
+	const isZipOrExe = ext === 'zip' || ext === 'exe';
+	if (!isZipOrExe && !ALLOWED_FILE_TYPES.has(file.type)) {
+		return 'Kun ZIP og EXE filer er tillatt for nedlasting.';
+	}
+	if (file.size > MAX_FILE_SIZE) {
+		return 'Filen kan ikke være større enn 500 MB.';
+	}
+	return null;
 }
 
 /** @deprecated Use validateNomineeFile instead */
@@ -162,5 +199,46 @@ export async function uploadNomineeImage(file: File): Promise<string> {
 			return uploadToCloudinary(file);
 		default:
 			return uploadToLocal(file);
+	}
+}
+
+export async function uploadNomineeDownloadFile(file: File): Promise<string> {
+	const storage = getUploadStorage();
+	console.error('[nominee-file-upload] file:', {
+		type: file.type,
+		size: file.size,
+		name: file.name,
+		storage,
+	});
+
+	const validationError = validateNomineeDownloadFile(file);
+	if (validationError) {
+		console.error('[nominee-file-upload] validation failed:', validationError);
+		throw new Error(validationError);
+	}
+
+	const ext = getFileExtension(file);
+	const safeName = file.name
+		.replace(/[^a-zA-Z0-9._-]/g, '_')
+		.replace(/_{2,}/g, '_')
+		.slice(0, 80);
+	const key = `nominees/files/${randomUUID()}-${safeName}.${ext}`;
+
+	switch (storage) {
+		case 's3': {
+			await uploadToS3(file, key);
+			return buildStoredMediaUrl(key);
+		}
+		default: {
+			// local fallback
+			const { writeFile } = await import('fs/promises');
+			const { ensureNomineesUploadDir } = await import('./local-storage');
+			const filename = `${randomUUID()}-${safeName}.${ext}`;
+			const dir = await ensureNomineesUploadDir();
+			const buffer = Buffer.from(await file.arrayBuffer());
+			await writeFile(`${dir}/${filename}`, buffer);
+			const { buildLocalUploadUrl } = await import('./local-storage');
+			return buildLocalUploadUrl(filename);
+		}
 	}
 }

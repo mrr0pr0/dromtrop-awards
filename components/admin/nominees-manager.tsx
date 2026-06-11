@@ -10,6 +10,7 @@ import type {
 } from '@/types';
 import { Button } from '@/components/ui/button';
 import { MediaUpload } from '@/components/ui/media-upload';
+import { FileUpload } from '@/components/ui/file-upload';
 import { Input } from '@/components/ui/input';
 import { getVisibleNomineeFields } from '@/lib/voting/category-layout';
 import { DataTable } from './data-table';
@@ -54,6 +55,8 @@ export function NomineesManager({
 	const [siteUrl, setSiteUrl] = useState('');
 	const [videoUrl, setVideoUrl] = useState('');
 	const [whatWeMade, setWhatWeMade] = useState('');
+	const [fileUrl, setFileUrl] = useState<string | null>(null);
+	const [fileUrlName, setFileUrlName] = useState<string | null>(null);
 	const [loading, setLoading] = useState(false);
 	const [statusLoading, setStatusLoading] = useState<
 		number | null
@@ -78,6 +81,7 @@ export function NomineesManager({
 				site_url: siteUrl || null,
 				video_url: videoUrl || null,
 				what_we_made: whatWeMade || null,
+				file_url: fileUrl || null,
 			}),
 		});
 		setName('');
@@ -87,6 +91,8 @@ export function NomineesManager({
 		setSiteUrl('');
 		setVideoUrl('');
 		setWhatWeMade('');
+		setFileUrl(null);
+		setFileUrlName(null);
 		setLoading(false);
 		router.refresh();
 	}
@@ -166,6 +172,14 @@ export function NomineesManager({
 					label="Bilde / video"
 					value={imageUrl}
 					onChange={setImageUrl}
+					className="sm:col-span-2"
+				/>
+
+				<FileUpload
+					label="Nedlastbar fil (ZIP / EXE)"
+					value={fileUrl}
+					fileName={fileUrlName}
+					onChange={(url, name) => { setFileUrl(url); setFileUrlName(name); }}
 					className="sm:col-span-2"
 				/>
 

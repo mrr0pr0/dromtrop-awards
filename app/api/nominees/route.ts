@@ -57,6 +57,8 @@ export async function POST(req: Request) {
 			body.video_url === '' ? null : body.video_url,
 		what_we_made:
 			body.what_we_made === '' ? null : body.what_we_made,
+		file_url:
+			body.file_url === '' ? null : body.file_url,
 	});
 	if (!parsed.success) {
 		return Response.json(
@@ -96,6 +98,8 @@ export async function PATCH(req: Request) {
 			body.video_url === '' ? null : body.video_url,
 		what_we_made:
 			body.what_we_made === '' ? null : body.what_we_made,
+		file_url:
+			body.file_url === '' ? null : body.file_url,
 	});
 	if (!parsed.success) {
 		return Response.json(
