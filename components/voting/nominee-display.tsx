@@ -7,12 +7,6 @@ import { cn } from '@/lib/utils/cn';
 import { resolveMediaUrl } from '@/lib/uploads/b2-media';
 import { isVideoMediaUrl } from '@/lib/utils/media-url';
 
-/** Returns true if the URL points to a downloadable file (exe, zip, etc.) */
-function isDownloadableFile(url: string): boolean {
-	const lower = url.toLowerCase().split('?')[0];
-	return /\.(exe|zip|rar|7z|tar|gz|msi|dmg|apk|pkg|deb|rpm|jar)$/.test(lower);
-}
-
 /** Extracts a filename from a URL for use as the download attribute */
 function getDownloadFilename(url: string): string {
 	try {
@@ -29,7 +23,9 @@ function FileDownloadButton({ fileUrl, nomineeName }: { fileUrl: string; nominee
 	if (!resolvedUrl) return null;
 
 	const filename = getDownloadFilename(resolvedUrl);
-	const ext = filename.split('.').pop()?.toUpperCase() ?? 'FIL';
+	const rawExt = filename.split('.').pop()?.toUpperCase() ?? '';
+	const knownExts = ['EXE', 'ZIP', 'RAR', '7Z', 'TAR', 'GZ', 'MSI', 'DMG', 'APK', 'PKG', 'DEB', 'RPM', 'JAR'];
+	const ext = knownExts.includes(rawExt) ? rawExt : 'ZIP';
 
 	return (
 		<a
@@ -261,6 +257,11 @@ export function NomineeDisplay({
 						Besøk produkt →
 					</a>
 				)}
+				{nominee.file_url && (
+					<div className="mb-4">
+						<FileDownloadButton fileUrl={nominee.file_url} nomineeName={nominee.name} />
+					</div>
+				)}
 				{voteBlock}
 			</div>
 		);
@@ -349,7 +350,7 @@ export function NomineeDisplay({
 						Åpne interaktivt →
 					</a>
 				)}
-				{nominee.file_url && isDownloadableFile(nominee.file_url) && (
+				{nominee.file_url && (
 					<div className="mb-0">
 						<FileDownloadButton fileUrl={nominee.file_url} nomineeName={nominee.name} />
 					</div>
@@ -408,7 +409,7 @@ export function NomineeDisplay({
 					{nominee.description}
 				</p>
 			)}
-			{nominee.file_url && isDownloadableFile(nominee.file_url) && (
+			{nominee.file_url && (
 				<FileDownloadButton fileUrl={nominee.file_url} nomineeName={nominee.name} />
 			)}
 			{voteBlock}
