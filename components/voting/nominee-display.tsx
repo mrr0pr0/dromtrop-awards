@@ -5,7 +5,7 @@ import { getCategoryLayout } from '@/lib/voting/category-layout';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils/cn';
 import { resolveMediaUrl } from '@/lib/uploads/b2-media';
-import { isVideoMediaUrl } from '@/lib/utils/media-url';
+import { isVideoMediaUrl, toYouTubeEmbedUrl } from '@/lib/utils/media-url';
 
 /** Extracts a filename from a URL for use as the download attribute */
 function getDownloadFilename(url: string): string {
@@ -141,9 +141,10 @@ export function NomineeDisplay({
 			>
 				{layout === 'shortFilm' && nominee.video_url ? (
 					<iframe
-						src={nominee.video_url}
+						src={toYouTubeEmbedUrl(nominee.video_url)}
 						title={nominee.name}
 						className="absolute inset-0 h-full w-full"
+						allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
 						allowFullScreen
 					/>
 				) : mediaUrl ? (
@@ -297,10 +298,11 @@ export function NomineeDisplay({
 				)}
 				{nominee.video_url && (
 					<iframe
-						src={nominee.video_url}
+						src={toYouTubeEmbedUrl(nominee.video_url)}
 						title={nominee.name}
 						className="mb-4 w-full rounded-lg md:hidden"
 						style={{ aspectRatio: '16 / 9' }}
+						allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
 						allowFullScreen
 					/>
 				)}
