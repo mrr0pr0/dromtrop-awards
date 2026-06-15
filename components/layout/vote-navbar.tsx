@@ -23,6 +23,7 @@ export async function VoteNavbar({
 	const session = await auth();
 	const user = session?.user;
 	const isStaff = isAdmin(session);
+	const resultsVisible = isStaff || process.env.RESULTS_VISIBLE === 'true';
 
 	return (
 		<header className="sticky top-0 z-20 flex min-h-[72px] flex-wrap items-center gap-3 border-b border-gold/40 bg-black/95 px-4 py-3 text-white sm:gap-5 sm:px-8 lg:px-14">
@@ -82,17 +83,19 @@ export async function VoteNavbar({
 						Nominer
 					</Link>
 				)}
-				<Link
-					href="/results"
-					className={cn(
-						'inline-flex min-h-10 shrink-0 items-center rounded-lg px-3 text-sm transition-colors',
-						activePath === 'results'
-							? 'bg-gold font-bold text-black'
-							: 'text-white/80 hover:bg-white/10 hover:text-white',
-					)}
-				>
-					Resultater
-				</Link>
+				{resultsVisible && (
+					<Link
+						href="/results"
+						className={cn(
+							'inline-flex min-h-10 shrink-0 items-center rounded-lg px-3 text-sm transition-colors',
+							activePath === 'results'
+								? 'bg-gold font-bold text-black'
+								: 'text-white/80 hover:bg-white/10 hover:text-white',
+						)}
+					>
+						Resultater
+					</Link>
+				)}
 				{isStaff && (
 					<Link
 						href="/admin/dashboard"

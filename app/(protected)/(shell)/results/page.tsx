@@ -1,5 +1,6 @@
 export const dynamic = 'force-dynamic';
 
+import { notFound } from 'next/navigation';
 import {
 	getFullLeaderboard,
 	countTotalVotes,
@@ -12,6 +13,8 @@ import { ResultsStats } from '@/components/results/results-stats';
 export const revalidate = 0;
 
 export default async function ResultsPage() {
+	if (process.env.RESULTS_VISIBLE !== 'true') notFound();
+
 	const [
 		leaderboard,
 		totalVotes,
