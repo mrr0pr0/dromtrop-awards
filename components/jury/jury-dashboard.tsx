@@ -291,6 +291,13 @@ function JuryNomineeCard({
 
 			<div className="mt-4 flex-1" />
 
+			<a
+				href={`/jury/nominee/${nominee.id}`}
+				className="mb-3 inline-flex w-full min-h-9 items-center justify-center rounded-lg border border-gold/25 text-xs font-semibold text-gold-light transition-all hover:-translate-y-px hover:text-white"
+			>
+				Se detaljer →
+			</a>
+
 			{hasVotedInCategory && isSelected ? (
 				<span className="inline-flex min-h-11 items-center justify-center rounded-lg border border-gold bg-gold/10 text-sm font-semibold text-gold">
 					Stemt ✓
