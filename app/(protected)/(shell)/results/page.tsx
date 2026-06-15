@@ -1,5 +1,7 @@
 export const dynamic = 'force-dynamic';
 
+import { auth } from '@/auth';
+import { isAdmin } from '@/lib/auth/permissions';
 import {
 	getFullLeaderboard,
 	countTotalVotes,
@@ -12,7 +14,9 @@ import { ResultsStats } from '@/components/results/results-stats';
 export const revalidate = 0;
 
 export default async function ResultsPage() {
-	const resultsVisible = process.env.RESULTS_VISIBLE === 'true';
+	const session = await auth();
+	const resultsVisible =
+		process.env.RESULTS_VISIBLE === 'true' || isAdmin(session);
 
 	const [
 		leaderboard,
@@ -56,7 +60,14 @@ export default async function ResultsPage() {
 			</section>
 
 			{resultsVisible ? (
-				<Leaderboard data={leaderboard} />
+				<>
+					{isAdmin(session) && process.env.RESULTS_VISIBLE !== 'true' && (
+						<p className="mb-4 rounded-lg border border-gold/25 bg-gold/10 px-4 py-3 text-sm text-gold-light">
+							Du ser dette som admin. Resultater er ikke synlige for vanlige brukere ennå.
+						</p>
+					)}
+					<Leaderboard data={leaderboard} />
+				</>
 			) : (
 				<div className="rounded-lg border border-gold/25 bg-charcoal px-6 py-12 text-center">
 					<p className="font-[family-name:var(--font-display)] text-2xl text-gold">

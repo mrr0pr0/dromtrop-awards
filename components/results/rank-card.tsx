@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import Image from 'next/image';
 import { resolveMediaUrl } from '@/lib/uploads/b2-media';
 import type { NomineeWithVotes } from '@/types';
@@ -10,7 +11,10 @@ export function RankCard({ nominee }: RankCardProps) {
 	const mediaUrl = resolveMediaUrl(nominee.image_url);
 
 	return (
-		<div className="grid min-h-20 grid-cols-[42px_minmax(0,1fr)] items-center gap-3 rounded-[14px] border border-gold-light/15 bg-parchment/[0.055] px-3 py-3 sm:grid-cols-[48px_64px_minmax(0,1fr)_auto] sm:gap-4">
+		<Link
+			href={`/vote/nominee/${nominee.id}`}
+			className="grid min-h-20 grid-cols-[42px_minmax(0,1fr)] items-center gap-3 rounded-[14px] border border-gold-light/15 bg-parchment/[0.055] px-3 py-3 transition-all hover:-translate-y-0.5 hover:border-gold/40 hover:bg-parchment/[0.09] sm:grid-cols-[48px_64px_minmax(0,1fr)_auto] sm:gap-4"
+		>
 			<div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gold/20 text-sm font-black text-gold tabular-nums">
 				{nominee.rank}
 			</div>
@@ -46,6 +50,6 @@ export function RankCard({ nominee }: RankCardProps) {
 					Ledende
 				</div>
 			)}
-		</div>
+		</Link>
 	);
 }
