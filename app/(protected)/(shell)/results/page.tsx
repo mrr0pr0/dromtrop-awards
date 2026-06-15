@@ -1,6 +1,5 @@
 export const dynamic = 'force-dynamic';
 
-import { notFound } from 'next/navigation';
 import {
 	getFullLeaderboard,
 	countTotalVotes,
@@ -13,7 +12,7 @@ import { ResultsStats } from '@/components/results/results-stats';
 export const revalidate = 0;
 
 export default async function ResultsPage() {
-	if (process.env.RESULTS_VISIBLE !== 'true') notFound();
+	const resultsVisible = process.env.RESULTS_VISIBLE === 'true';
 
 	const [
 		leaderboard,
@@ -21,7 +20,7 @@ export default async function ResultsPage() {
 		activeCategories,
 		approvedUsers,
 	] = await Promise.all([
-		getFullLeaderboard(),
+		resultsVisible ? getFullLeaderboard() : Promise.resolve([]),
 		countTotalVotes(),
 		countActiveCategories(),
 		countApprovedUsers(),
@@ -55,7 +54,19 @@ export default async function ResultsPage() {
 					approvedUsers={approvedUsers}
 				/>
 			</section>
-			<Leaderboard data={leaderboard} />
+
+			{resultsVisible ? (
+				<Leaderboard data={leaderboard} />
+			) : (
+				<div className="rounded-lg border border-gold/25 bg-charcoal px-6 py-12 text-center">
+					<p className="font-[family-name:var(--font-display)] text-2xl text-gold">
+						Resultater er ikke tilgjengelige ennå
+					</p>
+					<p className="mt-3 text-sm text-white/60">
+						Resultatene vil bli vist her når avstemningen er avsluttet.
+					</p>
+				</div>
+			)}
 		</div>
 	);
 }
